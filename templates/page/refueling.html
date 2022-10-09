@@ -1,0 +1,105 @@
+{% extends 'account/base/user.html' %}
+{% load static %}
+{% block user %}
+{% include 'base/messages.html' %}
+{% if sel_item %}
+
+<div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+      <div class="authentication-inner">
+        <!-- Register Card -->
+        <div class="card">
+          <div class="card-body">
+            <!-- Logo -->
+
+            <!-- /Logo -->
+            <h4 class="mb-2">Yakıt Fişi gönder 🚀</h4>
+            <p class="mb-4">Kaydetmeden önce kontrol ediniz!</p>
+            <form id="formAuthentication" action="{% url 'register_new_fueling' %}" class="mb-3" method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                <label for="username" class="form-label">Plaka</label>
+                <input type="text" value="{{sel_item.plate}}" class="form-control" id="username" name="plate" placeholder="Enter your username"readonly autofocus="">
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">Araç Bilgileri</label>
+                <input type="text" value="{{sel_item.get_vehicle_type_display}} - {{sel_item.brand}} - {{sel_item.model}}" class="form-control" id="email" name="email" placeholder="Enter your email"required  readonly>
+              </div>
+              <div class="mb-3 ">
+                <label for="username" class="form-label">Kilometre **</label>
+                <input type="number"  class="form-control" id="username" min="{{previous_amount}}"  name="kilometer" placeholder="Araç km'sini giriniz"  autofocus="" required>
+              </div>
+              <div class="mb-3 ">
+                <label for="username" class="form-label">Aldığı Litre **</label>
+                <input type="number" class="form-control" id="username" name="liter" placeholder="Litre" autofocus="" required>
+              </div>
+            <div class="mb-3 ">
+                <label for="username" class="form-label">Teslim Alan **({{sel_item.debit}})  </label>
+                <input type="text" class="form-control" id="username" name="delivery" placeholder="Yakıtı teslim alan" autofocus="" required>
+              </div>
+              <button class="btn btn-primary d-grid w-100">Kaydet</button>
+            </form>
+            <p class="text-center">
+                <span>Yeni araç yakıt girişi?</span>
+                <a href="/refueling">
+                  <span>Git</span>
+                </a>
+              </p>
+          </div>
+        </div>
+        <!-- Register Card -->
+      </div>
+    </div>
+  </div>
+{% else %}
+<div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+      <div class="authentication-inner py-4">
+        <div class="row">
+          <div class="col-lg-6 col-md-12 col-6 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                  <div class="avatar flex-shrink-0">
+                    <img src="{% static './assets/img/icons/unicons/wallet-info.png' %}" alt="chart success" class="rounded">
+                  </div>
+                </div>
+                <span class="fw-semibold d-block mb-1">Günlük dolum yapılan araç sayısı</span>
+                <h3 class="card-title text-center mb-2">{{adet}}</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-12 col-6 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                  <div class="avatar flex-shrink-0">
+                    <img src="{% static './assets/img/icons/unicons/paypal.png' %}" alt="Credit Card" class="rounded">
+                  </div>
+                </div>
+                <span class="fw-semibold d-block mb-1">Günlük doldurulan Litre</span>
+                <h3 class="card-title text-nowrap text-center mb-1">{{ilce}}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h4 class="mb-2">Yakıt Doldurma Ekranı 🔒</h4>
+            <p class="mb-4">Yakıt doldurmak isteğiniz aracın plakasını giriniz.</p>
+            <form id="formAuthentication" class="mb-3"  method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                <label for="email" class="form-label">Plaka</label>
+                <input type="text" class="form-control" id="tags"  name="plate" placeholder="plaka" autofocus="" required>
+              </div>
+              <button class="btn btn-primary d-grid w-100">Yakıt Yükleme</button>
+            </form>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

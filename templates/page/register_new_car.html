@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block content%}
+<div class="container-xxl flex-grow-1 container-p-y">
+  
+  <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Araçlar /</span>Yeni Araç</h4>
+  <div class="row">
+    <div class="col-md-12">
+      <ul class="nav nav-pills flex-column flex-md-row mb-3">
+        <li class="nav-item">
+          <a class="nav-link " href="{% url 'cars_home' %}"><i class="bx bx-user me-1"></i> Araçlar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'register_new_car' %}"><i  class='bx bx-add-to-queue'></i> Yeni Araç</a>
+        </li>
+
+      </ul>
+        <!-- Register Card -->
+        <div class="card">
+          <div class="card-body">
+
+            <form id="formAuthentication" class="mb-3" method="POST">
+              {% csrf_token %}
+              <div class="row">
+                <div class="mb-3 col-md-6">
+                  <label for="username" class="form-label">Plaka **</label>
+                  {{form.plate}}
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label for="username" class="form-label">Marka **</label>
+                    {{form.brand}}
+                  </div>
+              </div>
+              <div class="row">
+                <div class="mb-3 col-md-6">
+                  <label for="username" class="form-label">Model **</label>
+                  {{form.model}}
+                </div>
+                <div class="mb-3 col-md-6">
+                  <label for="username" class="form-label">Kilometre **</label>
+                  {{form.kilometer}}
+                </div>
+              </div>
+              <div class="row">
+                <div class="mb-3 col-md-6">
+                <label for="defaultFormControlInput" class="form-label">Zimmet</label>
+                {{form.debit}}
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label for="defaultFormControlInput" class="form-label">Ünvan</label>
+                    {{form.title}}
+                </div>
+              </div>
+              <div class="row">
+                <div class="mb-3 col-md-6">
+                  <label for="defaultSelect" class="form-label">Araç Cinsi</label>
+                  {{form.vehicle_type}}
+                  
+                </div>
+                <div class="mb-3 col-md-6">
+                  <label for="defaultSelect" class="form-label">Bağlı Olduğu İlçe</label>
+                  {{form.contry}}
+                 
+                </div>
+              </div>
+              <div class="row">
+                <div class="mb-3 col-md-6">
+                  <label for="defaultSelect" class="form-label">SahipliK durumu</label>
+                  {{form.possession}}
+                  
+                </div>
+                <div class="mb-3 col-md-6">
+                  <label for="defaultSelect" class="form-label">Daire Başkanlığı</label>
+                  {{form.department}}
+                  
+                </div>
+                </div>
+              <div class="mb-3 col-md-6">
+                <label for="exampleFormControlTextarea1" class="form-label">Açıklama</label>
+                {{form.comment}}
+              </div>
+              <br>
+              <h6>Durum</h6>
+              <div class="col-sm-4">
+                {{form.status}}
+                
+              </div>
+              <br>
+              <button class="btn btn-primary d-grid w-100" value="Register">Kaydet</button>
+            </form>
+
+          </div>
+        </div>
+        <!-- Register Card -->
+      </div>
+    </div>
+  </div>
+{% endblock %}

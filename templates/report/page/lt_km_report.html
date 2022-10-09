@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load tag_library %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Raporlama /</span> Km/Lt Raporlama</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <form id="formAuthentication" class="mb-3" method="POST">
+            {% csrf_token %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                    <div class="row gx-3 gy-2 align-items-center">
+                        <div class="col-md-3">
+                        <label class="form-label" for="selectTypeOpt">Araç Cinsi</label>
+                        <select id="selectTypeOpt" name="vehicle_type" class="form-select color-dropdown">
+                            <option value="" selected="">Tümü</option>
+                            <option value="mount">BİNEK</option>
+                            <option value="pick_up">PİCK UP</option>
+                            <option value="truck">KAMYON</option>
+                            <option value="water_tanker">SU TANKERİ</option>
+                            <option value="motorcycle">MOTOSİKLET</option>
+                            <option value="loader_exvator">YÜKLEYİCİ EKSKAVATÖR</option>
+                            <option value="driling_machine">SONDAJ MAKİNASI</option>
+                            <option value="forklift">FORKLIFT</option>
+                            <option value="generator">JENERATÖR</option>
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                        <label class="form-label" for="selectPlacement">Sahiplik Durumu</label>
+                        <select class="form-select placement-dropdown"name="possession" id="selectPlacement">
+                            <option value="">Tümü</option>
+                            <option value="contractor">MÜTAHİT</option>
+                            <option value="corporation">KURUM</option>
+                            <option value="forrent">KİRALIK</option>
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="selectPlacement">İlçe</label>
+                            <select class="form-select placement-dropdown"name="contry" id="selectPlacement">
+                                <option value="">Tümü</option>
+                                <option value="akçakale">AKÇAKALE</option>
+                                <option value="birecik">BİRECİK</option>
+                                <option value="bozova">BOZOVA</option>
+                                <option value="ceylanpınar">CEYLANPINAR</option>
+                                <option value="halfeti">HALFETİ</option>
+                                <option value="harran">HARRAN</option>
+                                <option value="hilvan">HİLVAN</option>
+                                <option value="siverek">SİVEREK</option>
+                                <option value="suruç">SURUÇ</option>
+                                <option value="viranşehir">VİRANŞEHİR</option>
+                                <option value="merkez">MERKEZ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 ">
+                            <label for="username" class="form-label">Ortalama tüketim(km/lt)</label>
+                            <input type="number"  class="form-control" id="username" min="2"  name="average" placeholder="Ortalama 1 lt'de kaç km gider? "  autofocus="" >
+                        </div>
+                        <div class="col-md-3">
+                        <label class="form-label" for="showToastPlacement">&nbsp;</label>
+                        <button id="showToastPlacement" class="btn btn-primary d-block">Filtrele</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </form>
+            {% include 'base/table.html' %}
+                <th style="color: #fff;">#</th>
+                <th style="color: #fff;">Plaka</th>
+                <th style="color: #fff;"> İlçe</th>
+                <th style="color: #fff;">Kilometre</th>
+                <th style="color: #fff;">Litre</th>
+                <th style="color: #fff;">km/lt</th>
+                <th style="color: #fff;">Teslim Alan</th>
+                <th style="color: #fff;">Tarih</th>
+            {% include 'base/table1.html' %}
+                {% for item in fuel %}
+                    <tr>
+                        <td scope="row">{{forloop.counter}}</td> 
+                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.car}}</strong></td>
+                        <td ><span style="text-transform:uppercase;">{{item.contry}}</span> </td>
+                        <td>{{item.kilometer}} </td>
+                        <td>{{item.liter}} </td>
+                        {% if item.average|to_int > filters %}
+                        <td><span class="badge bg-label-warning me-1">{{item.average | floatformat}}</span></td>
+                        {% else %}
+                        <td>{{item.average | floatformat }}</td>
+                        {% endif %}
+                        <td>{{item.delivery}} </td>
+                        <td>{{item.create_at}}</td>                            
+                    </tr>
+                {% endfor %}
+            {% include 'base/table2.html' %}
+
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}

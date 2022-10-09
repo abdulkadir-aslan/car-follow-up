@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block content%}
+    
+<div class="container-xxl flex-grow-1 container-p-y">
+  <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kullanıcılar /</span>Yeni Hesap</h4>
+
+  <div class="row">
+    <div class="col-md-12">
+      <ul class="nav nav-pills flex-column flex-md-row mb-3">
+        <li class="nav-item">
+          <a class="nav-link " href="{% url 'users_home' %}"><i class="bx bx-user me-1"></i> Hesaplar</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'register' %}"><i class="bx bx-bell me-1"></i> Yeni Hesap</a>
+        </li>
+      </ul>
+        <!-- Register Card -->
+        <div class="card">
+          <div class="card-body">
+
+            <form id="formAuthentication" class="mb-3" method="POST">
+              {% csrf_token %}
+              <div class="row">
+                <div class="mb-3 col-md-6">
+                  <label for="username" class="form-label">Username **</label>
+                  {{form.username}}
+                </div>
+                <div class="mb-3 col-md-6">
+                  <label for="exampleFormControlInput1" class="form-label">Email address **</label>
+                  {{form.email}}
+                </div>
+              </div>
+              <div class="row">
+                <div class="mb-3 col-md-6">
+                  <label for="username" class="form-label">Firstname **</label>
+                  {{form.first_name}}
+                </div>
+                <div class="mb-3 col-md-6">
+                  <label for="username" class="form-label">Lastname **</label>
+                  {{form.last_name}}
+                </div>
+              </div>
+              <div class="row">
+                <div class="mb-3 col-md-6 form-password-toggle">
+                  <label class="form-label" for="password">Password **</label>
+                  {{form.password1}}
+                </div>
+                <div class="mb-3 col-md-6 form-password-toggle">
+                  <label class="form-label" for="password">Re-Password **</label>
+                  {{form.password2}}
+                </div>
+              </div>
+              <h6>İLÇE</h6>
+              <div class="col-sm-4">
+                {{form.contry}}
+              </div>
+              <br>
+              <h6>Durum</h6>
+              <div class="col-sm-4">
+                {{form.status}}
+              </div>
+              <br>
+              <button class="btn btn-primary d-grid w-100" value="Register">Kaydet</button>
+            </form>
+
+          </div>
+        </div>
+        <!-- Register Card -->
+      </div>
+    </div>
+  </div>
+{% endblock %}

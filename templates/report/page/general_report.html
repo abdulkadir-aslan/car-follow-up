@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load tag_library %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Raporlama /</span> Genel Raporlama</h4>
+    <!--=== Filtreleme === -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row gx-3 gy-2 align-items-center">
+                    <div class="col-md-3">
+                    <label class="form-label" for="selectTypeOpt">İlçe</label>
+                    {% render_field myFilter.form.contry class="form-select color-dropdown" %}
+                    </div>
+                    <div class="col-md-3">
+                    <label class="form-label" for="selectPlacement">Araç Cinsi</label>
+                        {% render_field myFilter.form.car__vehicle_type class="form-select color-dropdown" %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="selectPlacement">Sahiplik Durumu</label>
+                            {% render_field myFilter.form.car__possession class="form-select color-dropdown" %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="selectPlacement">Daire Başkanlığı</label>
+                            {% render_field myFilter.form.car__department class="form-select color-dropdown" %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="selectPlacement">Başlangıç Tarihi</label>
+                            {% render_field myFilter.form.start_date class="form-control" type="date" %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="selectPlacement">Bitiş Tarihi</label>
+                            {% render_field myFilter.form.end_date class="form-control" type="date" %}
+                    </div>
+                    <div class="col-md-3">
+                    <label class="form-label" for="showToastPlacement">&nbsp;</label>
+                    <button id="showToastPlacement" class="btn btn-primary d-block">Filtrele</button>
+                    </div>
+                </div>
+        </form>
+        </div>
+        
+      </div>
+      <!--=== Filtreleme === -->
+            <!-- =======  Data-Table  = Start  ========================== -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="demo-inline-spacing">
+                    <a href="{% url 'export-excel'  %}"class="btn btn-success float-end">Exel</a>
+                    <a href="{% url 'export-pdf'  %}" class="btn btn-info float-end">Pdf</a>
+                    </div>
+                </div>
+                <hr class="m-0">
+                <div class="card">
+                    <div id="example_wrapper" class="table table-hover dataTable no-footer">
+                        <table class="table table-hover" >
+                        <thead>
+                            <tr >
+                                <th >#</th>
+                                <th >Plaka</th>
+                                <th>İlçe</th>
+                                <th>Kilometre</th>
+                                <th>Litre</th>
+                                <th>Teslim Alan</th>
+                                <th>Tarih</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                            {% for item in fuel %}
+                                <tr>
+                                    <td scope="row">{{ fuel.number|to_start|add:forloop.counter }}</td> 
+                                    <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.car}}</strong></td>
+                                    <td ><span style="text-transform:uppercase;">{{item.contry}}</span> </td>
+                                    <td>{{ item.kilometer }} </td>
+                                    <td>{{item.liter}} </td>
+                                    <td>{{item.delivery}} </td>
+                                    <td>{{item.create_at}}</td>
+                                </tr>
+                            {% endfor %}
+                            
+                        </tbody>
+                        </table>
+                        
+                    </div>
+                    <nav aria-label="Page navigation example ">
+                        <hr>
+                        <div class="row ">
+                            <div class="col-sm-12 col-md-5">
+                                <div class="container-fluid ">                                                          
+                                    <a class="navbar-brand mb-0 h1 " >{{ fuel.paginator.count }} Kayıttan  {{ fuel.number|to_start|add:1 }}- {% widthratio fuel.number 1 10 %} arası </a>
+                                    </div>
+                            </div>
+                            <div class="col-sm-12 col-md-7">
+                                <ul class="pagination justify-content-end px-4">
+                                    {% if fuel.has_previous %}
+                                        <li class="page-item" >
+                                            <a class="page-link" href="{% my_url fuel.previous_page_number 'page' request.GET.urlencode %}" >
+                                                ← Önceki
+                                            </a>
+                                        </li>
+                                    {% endif%}
+                                    {% for page_number in fuel.adjusted_elided_pages %}
+                                        {% if page_number == fuel.paginator.ELLIPSIS %}
+                                            <li >{{page_number}}</li>
+                                        {% else %}
+                                        <li class="page-item {% if page_number == fuel.number %}active{% endif %}" >
+                                            <a  href="{% my_url page_number 'page' request.GET.urlencode %}"
+                                            class="page-link {% if page_number == fuel.number %}current{% endif %}">
+                                            {{page_number}}
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                    {% endfor %} 
+                                    
+                                    {% if fuel.has_next %}
+                                        <li class="page-item" >
+                                            <a class="page-link" href="{% my_url fuel.next_page_number 'page' request.GET.urlencode %}" >
+                                                Sonraki →
+                                            </a>
+                                        </li>
+                                    {% endif%}
+                                    </ul>
+                            </div>
+                        </div>
+                </nav> 
+                    </div>
+                    
+                    
+                <!-- /Account -->
+            </div>
+            
+            <!-- print table -->
+            <!-- <script>
+                $('.btns').click(function(){
+                    var printme = document.getElementById("tblStocks");
+                    var wme = window.open("","","width=900,height=900");
+                    wme.document.write(printme.outerHTML);
+                    wme.document.close();
+                    wme.focus();
+                    wme.print();
+                    wme.close();
+                })
+            </script> -->
+
+            <!-- end print table -->
+            
+            
+                      <!-- =======  Data-Table  = End  ===================== -->
+</div>
+
+
+{% endblock content %}

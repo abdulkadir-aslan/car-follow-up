@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pdf</title>
+  
+  <style>
+    @page{
+      size: "A4";
+      margin: 2.5cm 1.5cm 3.5cm 1.5cm;
+
+      @top-center{
+        content: "Company name";
+      }    
+   
+  </style>
+</head>
+<body>
+  <table class="table " >
+    <thead>
+        <tr>
+            <th >#</th>
+            <th >Plaka</th>
+            <th>Ilçe</th>
+            <th>Kilometre</th>
+            <th>Litre</th>
+            <th>Teslim Alan</th>
+            <th>Tarih</th>
+        </tr>
+    </thead>
+    <tbody class="table-border-bottom-0">
+        {% for item in fuel %}
+            <tr>
+                <td scope="row">{{forloop.counter}}</td> 
+                <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.car}}</strong></td>
+                <td ><span style="text-transform:uppercase;">{{item.contry}}</span> </td>
+                <td>{{ item.kilometer }} </td>
+                <td>{{item.liter}} </td>
+                <td>{{item.delivery}} </td>
+                <td>{{item.create_at}}</td>
+            </tr>
+        {% endfor %}
+        
+    </tbody>
+    </table>
+</body>
+</html>

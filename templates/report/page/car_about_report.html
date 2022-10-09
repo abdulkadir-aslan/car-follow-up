@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Raporlama /</span> Araç Bilgileri Raporlama</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <form id="formAuthentication" class="mb-3" method="POST">
+            {% csrf_token %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                    <div class="row gx-3 gy-2 align-items-center">
+                        <div class="col-md-3">
+                        <label class="form-label" for="selectTypeOpt">Araç Cinsi</label>
+                        <select id="selectTypeOpt" name="vehicle_type" class="form-select color-dropdown">
+                            <option value="" selected="">Tümü</option>
+                            <option value="mount">BİNEK</option>
+                            <option value="pick_up">PİCK UP</option>
+                            <option value="truck">KAMYON</option>
+                            <option value="water_tanker">SU TANKERİ</option>
+                            <option value="motorcycle">MOTOSİKLET</option>
+                            <option value="loader_exvator">YÜKLEYİCİ EKSKAVATÖR</option>
+                            <option value="driling_machine">SONDAJ MAKİNASI</option>
+                            <option value="forklift">FORKLIFT</option>
+                            <option value="generator">JENERATÖR</option>
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                        <label class="form-label" for="selectPlacement">Sahiplik Durumu</label>
+                        <select class="form-select placement-dropdown"name="possession" id="selectPlacement">
+                            <option value="">Tümü</option>
+                            <option value="contractor">MÜTAHİT</option>
+                            <option value="corporation">KURUM</option>
+                            <option value="forrent">KİRALIK</option>
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="selectPlacement">İlçe</label>
+                            <select class="form-select placement-dropdown"name="contry" id="selectPlacement">
+                                <option value="">Tümü</option>
+                                <option value="akçakale">AKÇAKALE</option>
+                                <option value="birecik">BİRECİK</option>
+                                <option value="bozova">BOZOVA</option>
+                                <option value="ceylanpınar">CEYLANPINAR</option>
+                                <option value="halfeti">HALFETİ</option>
+                                <option value="harran">HARRAN</option>
+                                <option value="hilvan">HİLVAN</option>
+                                <option value="siverek">SİVEREK</option>
+                                <option value="suruç">SURUÇ</option>
+                                <option value="viranşehir">VİRANŞEHİR</option>
+                                <option value="merkez">MERKEZ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="defaultSelect" class="form-label">Daire Başkanlığı</label>
+                            <select id="defaultSelect" name="department" class="form-select">
+                              <option value="">Tümü</option>
+                              <option value="1"{% if sel_item.department == '1'  %}selected=""{% endif %}>İNSAN KAYNAKLARI</option>
+                              <option value="2"{% if sel_item.department == '2'  %}selected=""{% endif %}>MALİ HİZMETLER</option>
+                              <option value="3"{% if sel_item.department == '3'  %}selected=""{% endif %}>ARITMA TESİSLERİ</option>
+                              <option value="4"{% if sel_item.department == '4'  %}selected=""{% endif %}>BİLGİ İŞLEM</option>
+                              <option value="5"{% if sel_item.department == '5'  %}selected=""{% endif %}>DESTEK HİZMETLERİ</option>
+                              <option value="6"{% if sel_item.department == '6'  %}selected=""{% endif %}>İÇME SUYU VE KANALİZASYON</option>
+                              <option value="7"{% if sel_item.department == '7'  %}selected=""{% endif %}>PLAN VE PROJE</option>
+                              <option value="8"{% if sel_item.department == '8'  %}selected=""{% endif %}>STRATEJİ GELİŞTİRME</option>
+                              <option value="9"{% if sel_item.department == '9'  %}selected=""{% endif %}>SU VE ATIK SU TEKNOLOJİLERİ</option>
+                              <option value="10"{% if sel_item.department == '10'  %}selected=""{% endif %}>YATIRIM İNŞAAT</option>
+                              <option value="11"{% if sel_item.department == '11'  %}selected=""{% endif %}>ABONE İŞLERİ</option>
+                              <option value="12"{% if sel_item.department == '12'  %}selected=""{% endif %}>TEFTİŞ KURULU</option>
+                              <option value="13"{% if sel_item.department == '13'  %}selected=""{% endif %}>HUKUK MÜŞAVİRLİĞİ</option>
+                            </select>
+                          </div>
+                        <div class="col-md-3">
+                        <label class="form-label" for="showToastPlacement">&nbsp;</label>
+                        <button id="showToastPlacement" class="btn btn-primary d-block">Filtrele</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </form>
+            {% include 'base/table.html' %}
+              <th style="color: #fff;">#</th>
+              <th style="color: #fff;">Plaka</th>
+              <th style="color: #fff;">Marka</th>
+              <th style="color: #fff;">Model</th>
+              <th style="color: #fff;">Zimmet</th>
+              <th style="color: #fff;">Ünvan</th>
+              <th style="color: #fff;">Kilometre</th>
+              <th style="color: #fff;">Araç Tipi</th>
+              <th style="color: #fff;">İlçe</th>
+              <th style="color: #fff;">Daire Başkanlığı</th>
+              <th style="color: #fff;">SahipliK</th>
+              <th style="color: #fff;">Kayıt Tarihi</th>
+            {% include 'base/table1.html' %}
+              {% for item in car %}
+              <tr>
+                  <td scope="row">{{forloop.counter}}</td> 
+                  <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.plate}}</strong></td>
+                  <td><span style="text-transform:uppercase;">{{item.brand}}</span></td>
+                  <td><span style="text-transform:uppercase;">{{item.model}}</span> </td>
+                  <td>{{item.debit}} </td>
+                  <td>{{item.title}} </td>
+                  <td>{{item.kilometer}} </td>
+                  <td>{{item.get_vehicle_type_display}}</td>
+                  <td>{{item.get_contry_display}}</td>
+                  <td>{{item.get_department_display}}</td>
+                  <td>{{item.get_possession_display}}</td>
+                  <td>{{item.create_at}} </td>
+              </tr>
+
+              {% endfor %}
+            {% include 'base/table2.html' %}
+          
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}

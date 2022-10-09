@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Raporlama /</span> Genel Raporlama</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <form id="formAuthentication" class="mb-3" method="POST">
+            {% csrf_token %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                    <div class="row gx-3 gy-2 align-items-center">
+                        <div class="col-md-3 ">
+                            <label for="username" class="form-label">Plaka</label>
+                            <input type="text   "  class="form-control" id="username"   name="plate" placeholder="Araç Plakasını giriniz. "  autofocus="" required>
+                        </div>
+                        <div class="col-md-3">
+                        <label class="form-label" for="showToastPlacement">&nbsp;</label>
+                        <button id="showToastPlacement" class="btn btn-primary d-block">Filtrele</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+<div class="row">
+  <div class="col-md-12" >
+    <canvas id="myChart" width="600" height="200"></canvas>
+
+
+<script>
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',// 'bar','line','polarArea'
+          data: {
+              labels: ['OCAK','ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN', 'TEMMUZ','AĞUSTOS'
+            ,'EYLÜL','EKİM','KASIM','ARALIK'],
+              datasets: [{
+                  label: '"{{car}}" Grafiği',
+                  data: {{default}},
+                  fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+              },
+              {
+                label: 'Yıllık Ortalama Grafiği',
+                data: {{default1}},
+                fill: false,
+                borderColor: 'rgb(75, 80, 192)',
+                tension: 0.1,
+              },
+              {
+                  label: 'Tüm "{{ car.get_vehicle_type_display }}" Araçların Yıllık Ortalama Grafiği ',
+                  data: {{default2}},
+                  fill: false,
+                    borderColor: "#FF1654",
+                    tension: 0.1,
+              }]
+          },
+      //HERE COMES THE AXIS Y LABEL
+      options : {
+        scales: {
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'km/lt'
+            }
+          }]
+        }
+      }
+    });
+  </script>
+  </div> 
+</div>
+
+{% endblock content %}

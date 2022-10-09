@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load tag_library %}
+
+{% block content%}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Yakıt Listesi /</span> Alınan Yakıtlar</h4>
+    <div class="row">
+        <div class="col-md-12">
+        <ul class="nav nav-pills flex-column flex-md-row mb-3">
+            <li class="nav-item">
+            <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-user me-1"></i> Alınan Yakıtlar</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="{% url 'refueling' %}"><i  class='bx bx-add-to-queue'></i> Yeni Yakıt Al</a>
+            </li>
+        </ul>
+        <div class="card mb-4">
+        <div class="card">
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover" >
+                <thead>
+                    <tr>
+                    <th>#</th>
+                    <th>Plaka</th>
+                    <th>İlçe</th>
+                    <th>Kilometre</th>
+                    <th>Litre</th>
+                    <th>Teslim Alan</th>
+                    <th>Tarih</th>
+                    <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    {% for item in fuel %}
+                        <tr>
+                            <td scope="row">{{ fuel.number|to_start|add:forloop.counter }}</td> 
+                            <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.car}}</strong></td>
+                            <td><span style="text-transform:uppercase;">{{item.contry}} </span></td>
+                            <td>{{item.kilometer}} </td>
+                            <td>{{item.liter}} </td>
+                            <td>{{item.delivery}} </td>
+                            <td>{{item.create_at}}</td>
+                            <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                <!-- <a class="dropdown-item" href="#"><i class="bx bx-edit-alt me-1"></i> Edit</a> -->
+                                <a class="dropdown-item" href="{% url 'fuels_delete' item.id %}"><i class="bx bx-trash me-1"></i> Delete</a>
+                                </div>
+                            </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    
+                </tbody>
+                </table>
+                
+            </div>
+            <nav aria-label="Page navigation example ">
+                <hr>
+                <div class="row ">
+                    <div class="col-sm-12 col-md-5">
+                        <div class="container-fluid ">                                                          
+                            <a class="navbar-brand mb-0 h1 " >{{ fuel.paginator.count }} Kayıttan  {{ fuel.number|to_start|add:1 }}- {% widthratio fuel.number 1 10 %} arası </a>
+                            </div>
+                    </div>
+                    <div class="col-sm-12 col-md-7">
+                        <ul class="pagination justify-content-end px-4">
+                            {% if fuel.has_previous %}
+                                <li class="page-item" >
+                                    <a class="page-link" href="?page={{ fuel.previous_page_number }}" >
+                                        ← Önceki
+                                    </a>
+                                </li>
+                            {% endif%}
+                            {% for page_number in fuel.adjusted_elided_pages %}
+                                {% if page_number == fuel.paginator.ELLIPSIS %}
+                                    <li >{{page_number}}</li>
+                                {% else %}
+                                <li class="page-item {% if page_number == fuel.number %}active{% endif %}" >
+                                    <a  href="?page={{ page_number }}"
+                                    class="page-link {% if page_number == fuel.number %}current{% endif %}">
+                                    {{page_number}}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %} 
+                            
+                            {% if fuel.has_next %}
+                                <li class="page-item" >
+                                    <a class="page-link" href="?page={{ fuel.next_page_number }}" >
+                                        Sonraki →
+                                    </a>
+                                </li>
+                            {% endif%}
+                            </ul>
+                    </div>
+                </div>
+        </nav>
+            </div>
+            
+            
+        <!-- /Account -->
+        </div>
+
+    </div>
+    </div>
+</div>
+{% endblock %}
