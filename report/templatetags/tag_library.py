@@ -6,6 +6,10 @@ register = template.Library()
 def to_int(value):
     return float(value)
 
+@register.simple_tag
+def subtract(value, arg):
+    return value - arg
+
 @register.filter()
 def to_start(value):
     return (value-1)*10

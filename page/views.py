@@ -14,9 +14,14 @@ from django.core.paginator import Paginator
 def index(request):
     context = dict()
     if request.user.is_superuser:
+        fuel = Fuell.objects.select_related("car","user").all()
         dateNow = datetime.now().date()
         dateTomorrow = dateNow + timedelta(days=1)
-        a = Fuell.objects.all().filter(create_at__range=(date(dateNow.year,dateNow.month,dateNow.day),date(dateTomorrow.year,dateTomorrow.month,dateTomorrow.day)))
+        yesterday = dateNow + timedelta(days= -1)
+        yesterday = fuel.filter(create_at__range=(date(yesterday.year,yesterday.month,yesterday.day),date(dateNow.year,dateNow.month,dateNow.day)))
+        month = fuel.filter(create_at__range=(date(dateNow.year,dateNow.month,1),date(dateNow.year,dateNow.month,31)))
+        year = fuel.filter(create_at__range=(date(dateNow.year,1,1),date(dateNow.year,12,31)))
+        a = fuel.filter(create_at__range=(date(dateNow.year,dateNow.month,dateNow.day),date(dateTomorrow.year,dateTomorrow.month,dateTomorrow.day)))
         akcakale = sum([item.liter for item in a.filter(contry="akçakale")])
         birecik = sum([item.liter for item in a.filter(contry="birecik")])
         bozova = sum([item.liter for item in a.filter(contry="bozova")])
@@ -29,6 +34,10 @@ def index(request):
         viranşehir = sum([item.liter for item in a.filter(contry="viranşehir")])
         merkez = sum([item.liter for item in a.filter(contry="merkez")])
         context = {
+            "today": sum([item.liter for item in a]),
+            "yesterday": sum([item.liter for item in yesterday]),
+            "month": sum([item.liter for item in month]),
+            "year": sum([item.liter for item in year]),
             "default":[merkez,akcakale,birecik,bozova,ceylanpınar,halfeti,harran,hilvan,siverek,suruç,viranşehir]
         }
         return render(request,'index.html',context)
@@ -138,7 +147,6 @@ def refueling(request):
     if request.method == "POST":
         plate = request.POST["plate"]
         if plate != "":
-            
             try:
                 car = Car.objects.get(plate=plate.upper())
                 previous_amount = Fuell.objects.filter(car = car).order_by('-create_at')

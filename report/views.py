@@ -1,21 +1,16 @@
-from fileinput import filename
 from django.shortcuts import render
-from django.views.generic import View
 from page.models import Car,Fuell
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from page.decorators import *
-from datetime import datetime,date,timedelta
+from datetime import datetime,date
 from django.db.models import Sum
 from django.core.paginator import Paginator
-from .filters import OrderFilter
+from .filters import OrderFilter,CarFilter,LiterFilter
 
 import xlwt
-from io import BytesIO
 from django.http import HttpResponse
-from django.template.loader import get_template
 
-from xhtml2pdf import pisa
 
 @login_required(login_url="login")
 @admin_only
@@ -43,58 +38,61 @@ def general_report(request):
     }
     return render(request,'report/page/general_report.html',context)
 
-
 @login_required(login_url="login")
 @admin_only
 def car_about_report(request):
-    car = Car.objects.all().filter(status="active")
-    if request.method == "POST":
-        if (request.POST["vehicle_type"] != ""):
-            car = car.filter(vehicle_type=request.POST["vehicle_type"])
-        if (request.POST["possession"] != ""):
-            car = car.filter(possession=request.POST["possession"])
-        if (request.POST["contry"] != ""):
-            car = car.filter(contry=request.POST["contry"])
-        if (request.POST["department"] != ""):
-            car = car.filter(department=request.POST["department"])
-    
+    car = Car.objects.select_related().all().order_by('-create_at')
+    myFilter = CarFilter(request.GET,queryset=car)
+    car = myFilter.qs
+    global car_about_report
+    car_about_report = car
+    paginator = Paginator(car, 10) # Show 10 contacts per page.
+    page_number = request.GET.get("page")
+    item_list = paginator.get_page(page_number)
+    if page_number is not None:
+        item_list.adjusted_elided_pages = paginator.get_elided_page_range(page_number)
+    else:
+        item_list.adjusted_elided_pages = paginator.get_elided_page_range(1)
     if car.count() ==0:
         messages.add_message(
                         request,messages.INFO,
                         'İstenilen filtrede değerler bulunamadı.')
         car = []
-    context = { 
-            "car":car,
-               }
+    context ={
+        "car":item_list,
+        "myFilter": myFilter
+    }
     return render(request,'report/page/car_about_report.html',context)
 
 @login_required(login_url="login")
 @admin_only
 def lt_km_report(request):
-    filters = ""
-    fuel = Fuell.objects.select_related("car","user").all()
-    if request.method == "POST":
-        if request.POST["possession"] != "":
-            fuel = fuel.filter(car__possession=request.POST["possession"])
-       
-        if (request.POST["contry"] != ""):
-            fuel = fuel.filter(contry=request.POST["contry"])
-            
-        if request.POST["vehicle_type"] != "":
-            fuel = fuel.filter(car__vehicle_type=request.POST["vehicle_type"])
-        
-        if (request.POST["average"] != ""):
-            filters = int(request.POST["average"])
-    
-    if fuel.count() ==0:
+    car = Fuell.objects.select_related("car","user").all().order_by('-create_at')
+    myFilter = LiterFilter(request.GET,queryset=car)
+    car = myFilter.qs
+    global liter_report
+    liter_report = car
+    paginator = Paginator(car, 10) # Show 10 contacts per page.
+    page_number = request.GET.get("page")
+    item_list = paginator.get_page(page_number)
+    if page_number is not None:
+        item_list.adjusted_elided_pages = paginator.get_elided_page_range(page_number)
+    else:
+        item_list.adjusted_elided_pages = paginator.get_elided_page_range(1)
+    if car.count() ==0:
         messages.add_message(
-        request,messages.INFO,
-        'İstenilen filtrede değerler bulunamadı.')
-        fuel = []
-    context = { 
-        "fuel":fuel,
+                        request,messages.INFO,
+                        'İstenilen filtrede değerler bulunamadı.')
+        car = []
+    filters = ""
+    if request.GET.get("average") is not None:
+        if (request.GET["average"] != ""):
+            filters = int(request.GET.get("average"))
+    context ={
+        "fuel":item_list,
+        "myFilter": myFilter,
         "filters":filters
-            }
+    }
     return render(request,'report/page/lt_km_report.html',context)
 
 def calculate(data):
@@ -148,6 +146,34 @@ def plate_report(request):
     }
     return render(request,'report/page/plate_report.html',context)
 
+#Export exel
+def export_Liter_Excel(request):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=Lt/Km Raporlama-'+\
+        str(datetime.now().date())+'.xls'
+    wb = xlwt.Workbook(encoding = "utf-8")
+    ws = wb.add_sheet("Expenses")
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    column = ["Plaka","İlçe","Kilometre","Litre","Km/Lt","Teslim alan","Tarih"]
+
+    for col_num in range(len(column)):
+        ws.write(row_num,col_num,column[col_num],font_style)
+
+    font_style = xlwt.XFStyle()
+
+    rows = liter_report.values_list("car__plate","contry","kilometer","liter","average","delivery","create_at")
+
+    for row in rows:
+        row_num += 1
+        for col_num in range(len(row)):
+            ws.write(row_num,col_num,str(row[col_num]).upper(),font_style)
+    wb.save(response)
+
+    return response
+
 def export_Excel(request):
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename=Genel_Raporlama-'+\
@@ -157,46 +183,57 @@ def export_Excel(request):
     row_num = 0
     font_style = xlwt.XFStyle()
     font_style.font.bold = True
-    
+
     column = ["Plaka","İlçe","Kilometre","Litre","Teslim alan","Tarih"]
-    
+
     for col_num in range(len(column)):
         ws.write(row_num,col_num,column[col_num],font_style)
-    
+
     font_style = xlwt.XFStyle()
-    
+
     rows = fuel_general_report.values_list("car__plate","contry","kilometer","liter","delivery","create_at")
-    
+
     for row in rows:
         row_num += 1
         for col_num in range(len(row)):
-            ws.write(row_num,col_num,str(row[col_num]),font_style)
+            ws.write(row_num,col_num,str(row[col_num]).upper(),font_style)
     wb.save(response)
-    
+
     return response
-            
 
+def export_Car_Excel(request):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=Araç Bilgileri-'+\
+        str(datetime.now().date())+'.xls'
+    wb = xlwt.Workbook(encoding = "utf-8")
+    ws = wb.add_sheet("Expenses")
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
 
-   
-def pdf_report_create(request):
-    # products = Fuell.objects.all().filter(contry="birecik",car__vehicle_type="mount")
-    
-    template_path = 'expenses/pdf-output.html'
+    column = ["Plaka","Marka","Model","Araç Cinsi","Zimmet","Ünvan","Kilometre","Sahiplik","Daire Başkanlığı","iLÇE","Tarih","Durum","Açıklama"]
 
-    context = {'fuel': fuel_general_report}
+    for col_num in range(len(column)):
+        ws.write(row_num,col_num,column[col_num],font_style)
 
-    response = HttpResponse(content_type='application/pdf')
+    font_style = xlwt.XFStyle()
+    date_style =xlwt.easyxf(num_format_str="dd/mm/yyyy") 
+    rows = car_about_report
+    for row in rows:
+        row_num += 1
+        ws.write(row_num,0,row.plate,font_style)
+        ws.write(row_num,1,row.brand.upper(),font_style)
+        ws.write(row_num,2,row.model.upper(),font_style)
+        ws.write(row_num,3,row.get_vehicle_type_display(),font_style)
+        ws.write(row_num,4,row.debit.upper(),font_style)
+        ws.write(row_num,5,row.title.upper(),font_style)
+        ws.write(row_num,6,int(row.kilometer),font_style)
+        ws.write(row_num,7,row.get_possession_display(),font_style)
+        ws.write(row_num,8,row.get_department_display(),font_style)
+        ws.write(row_num,9,row.get_contry_display(),font_style)
+        ws.write(row_num,10,datetime.date(row.create_at),date_style)
+        ws.write(row_num,11,row.get_status_display(),font_style)
+        ws.write(row_num,12,row.comment,font_style)
+    wb.save(response)
 
-    response['Content-Disposition'] = 'filename="products_report.pdf"'
-
-    template = get_template(template_path)
-
-    html = template.render(context)
-
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response)
-    # if error then show some funy view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
