@@ -8,6 +8,7 @@ from account.forms import CarForm
 from django.contrib import messages
 from django.db.models import ProtectedError
 from django.core.paginator import Paginator
+from report.filters import PlateFilter,FuelPlateFilter
 
 
 @login_required(login_url="login")
@@ -44,12 +45,34 @@ def index(request):
     else:
         return redirect("refueling")
 
+def page_not_found(request,exception):
+    return render(request,"404-error.html")
+
+def page_not_found_500(request):
+    return render(request,"404-error.html")
 
 @login_required(login_url="login")
 @admin_only
 def cars_home(request):
-    context = dict()
-    context["car"]= Car.objects.all()
+    car = Car.objects.select_related().all().order_by('-create_at')
+    myFilter = PlateFilter(request.GET,queryset=car)
+    car = myFilter.qs
+    paginator = Paginator(car, 10)
+    page_number = request.GET.get("page")
+    item_list = paginator.get_page(page_number)
+    if page_number is not None:
+        item_list.adjusted_elided_pages = paginator.get_elided_page_range(page_number)
+    else:
+        item_list.adjusted_elided_pages = paginator.get_elided_page_range(1)
+    if car.count() ==0:
+        messages.add_message(
+                        request,messages.INFO,
+                        'İstenilen filtrede değerler bulunamadı.')
+        car = []
+    context ={
+        "car":item_list,
+        "myFilter": myFilter,
+    }
     return render(request ,'page/car_home.html',context)
 
 @login_required(login_url="login")
@@ -137,12 +160,13 @@ def update_car(request,myid):
 def refueling(request):
     dateNow = datetime.now().date()
     dateTomorrow = dateNow + timedelta(days=1)
-    a = Fuell.objects.all().filter(contry=request.user.contry,create_at__range=(date(dateNow.year,dateNow.month,dateNow.day),date(dateTomorrow.year,dateTomorrow.month,dateTomorrow.day)))
-    ilce = sum([item.liter for item in a])
+    a = Fuell.objects.all().filter(contry=request.user.contry,create_at__range=(date(dateNow.year,dateNow.month,dateNow.day),date(dateTomorrow.year,dateTomorrow.month,dateTomorrow.day))).order_by('-create_at')
+    litre = sum([item.liter for item in a])
     adet = a.count()
     context ={
-        "ilce" : ilce,
-        "adet" : adet, 
+        "liter" : litre,
+        "adet" : adet,
+        "fuel" : a
     }
     if request.method == "POST":
         plate = request.POST["plate"]
@@ -174,8 +198,6 @@ def refueling(request):
                 f'*{plate}* Plakalı araç kayıtlarda bulunmamaktadır.')
     return render(request,"page/refueling.html",context)
 
-
-
 @login_required(login_url="login")
 def register_new_fueling(request):
     user =User.objects.get(username=request.user.username) 
@@ -199,11 +221,12 @@ def register_new_fueling(request):
         return redirect("refueling")
     return render(request,"page/refuling.html")
 
-
 @login_required(login_url="login")
 @admin_only
 def fuels_home(request):
     fuel= Fuell.objects.select_related("car","user").all().order_by('-create_at')
+    myFilter = FuelPlateFilter(request.GET,queryset=fuel)
+    fuel = myFilter.qs
     paginator = Paginator(fuel, 10) # Show 10 contacts per page.
     page_number = request.GET.get("page")
     item_list = paginator.get_page(page_number)
@@ -211,17 +234,39 @@ def fuels_home(request):
         item_list.adjusted_elided_pages = paginator.get_elided_page_range(page_number)
     else:
         item_list.adjusted_elided_pages = paginator.get_elided_page_range(1)
+    if fuel.count() ==0:
+        messages.add_message(
+                        request,messages.INFO,
+                        'İstenilen filtrede değerler bulunamadı.')
+        fuel = []
     context ={
-        "fuel":item_list
+        "fuel":item_list,
+        "myFilter": myFilter,
     }
     return render(request ,'page/refueling_home.html',context)
 
-
 @login_required(login_url="login")
-@admin_only
 def fuelsDelete(request,myid):
     fuel = Fuell.objects.get(id=myid)
-    fuel.delete()
+    if request.user.is_superuser:
+        fuel.delete()
+    else:
+        value = fuel.create_at + timedelta(hours=3)
+        dateNow = datetime.now()
+        dakika = int(dateNow.time().strftime('%M'))-int(value.time().strftime('%M'))
+        saat =int(dateNow.time().strftime('%H'))-int(value.time().strftime('%H'))
+        print(saat,dakika,fuel.create_at)
+        if (saat == 0) and (dakika <= 3):
+            fuel.delete()
+        else:
+            messages.add_message(
+            request,messages.WARNING,
+            "Yakıt Fişi Silme Süresi Bitmiştir.\nLütfen Yönetici İle İletişime Geçiniz.")
+            return redirect('refueling')
+        messages.add_message(
+            request,messages.SUCCESS,
+            f"*{fuel.car}* Plakalı araç için '{fuel.create_at}' tarihindeki yakıt doldurma fişi silinmiştir.")
+        return redirect('refueling')
     messages.add_message(
             request,messages.SUCCESS,
             f"*{fuel.car}* Plakalı araç için '{fuel.create_at}' tarihindeki yakıt doldurma fişi silinmiştir.")

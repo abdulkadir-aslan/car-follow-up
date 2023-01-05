@@ -1,6 +1,18 @@
 from django import template
+from datetime import datetime,timedelta
 
 register = template.Library()
+
+@register.filter()
+def date_day(value):
+    value = value + timedelta(hours=3)
+    dateNow = datetime.now()
+    dakika = int(dateNow.time().strftime('%M'))-int(value.time().strftime('%M'))
+    saat =int(dateNow.time().strftime('%H'))-int(value.time().strftime('%H'))
+    if (saat == 0) and (dakika <= 3):
+        return True
+    else:   
+        return False
 
 @register.filter()
 def to_int(value):

@@ -50,3 +50,21 @@ class LiterFilter(django_filters.FilterSet):
         ]
         exclude = ['customer','create_at ']
    
+class PlateFilter(django_filters.FilterSet):
+    plate= CharFilter(field_name = "plate",lookup_expr="icontains")
+    class Meta:
+        model = Car
+        fields = [
+            "plate",
+             ]
+        exclude = ['customer','create_at ']
+
+class FuelPlateFilter(django_filters.FilterSet):
+    plate= CharFilter(field_name = "car__plate",lookup_expr="icontains")
+    class Meta:
+        model = Fuell
+        fields = [
+            "car__plate",
+             ]
+        exclude = ['customer','create_at ']
+  

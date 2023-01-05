@@ -2,8 +2,9 @@
 {% load static %}
 {% block user %}
 {% include 'base/messages.html' %}
-{% if sel_item %}
+{% load tag_library %}
 
+{% if sel_item %}
 <div class="container-xxl">
     <div class="authentication-wrapper authentication-basic container-p-y">
       <div class="authentication-inner">
@@ -23,7 +24,7 @@
               </div>
               <div class="mb-3">
                 <label for="email" class="form-label">Araç Bilgileri</label>
-                <input type="text" value="{{sel_item.get_vehicle_type_display}} - {{sel_item.brand}} - {{sel_item.model}}" class="form-control" id="email" name="email" placeholder="Enter your email"required  readonly>
+                <input type="text" value="{{sel_item.get_vehicle_type_display}} - {{sel_item.brand|upper}} - {{sel_item.model|upper}}"  class="form-control" id="email" name="email" required  readonly>
               </div>
               <div class="mb-3 ">
                 <label for="username" class="form-label">Kilometre **</label>
@@ -54,52 +55,77 @@
 {% else %}
 <div class="container-xxl">
     <div class="authentication-wrapper authentication-basic container-p-y">
-      <div class="authentication-inner py-4">
-        <div class="row">
-          <div class="col-lg-6 col-md-12 col-6 mb-4">
-            <div class="card">
-              <div class="card-body">
-                <div class="card-title d-flex align-items-start justify-content-between">
-                  <div class="avatar flex-shrink-0">
-                    <img src="{% static './assets/img/icons/unicons/wallet-info.png' %}" alt="chart success" class="rounded">
-                  </div>
-                </div>
-                <span class="fw-semibold d-block mb-1">Günlük dolum yapılan araç sayısı</span>
-                <h3 class="card-title text-center mb-2">{{adet}}</h3>
-              </div>
+      <div class="row">
+        {% if adet > 0 %}
+        <div class="col-lg-6 col-sm-12 col-12 mb-4 py-4">
+          <div class="card mb-4">
+            <h5 class="card-header">Yakıt Alınan Araç Listesi</h5>
+            <div class="list-group">
+              {% for item in fuel %}
+                <label class="list-group-item">
+                  {% if item.create_at|date_day %}
+                    <a class="btn btn-icon btn-outline-danger" title="sil"  href="{% url 'fuels_delete' item.id %}">
+                      <i class="tf-icons bx bx-message-square-x"></i>
+                    </a>
+                  {% endif %}
+                  <strong>{{item.car.plate}}</strong> 
+                  <span class="badge bg-label-primary me-1">{{item.liter}}L</span>
+                  <span class="badge bg-label-warning me-1">{{item.kilometer}}KM</span>
+                </label>
+              {% endfor %}
             </div>
           </div>
-          <div class="col-lg-6 col-md-12 col-6 mb-4">
-            <div class="card">
-              <div class="card-body">
-                <div class="card-title d-flex align-items-start justify-content-between">
-                  <div class="avatar flex-shrink-0">
-                    <img src="{% static './assets/img/icons/unicons/paypal.png' %}" alt="Credit Card" class="rounded">
+        </div>
+        {% endif %}
+        <div class="{% if adet > 0 %} col-lg-6 {% else %} col-lg-12 {% endif %} col-sm-12 col-12 mb-4">
+          <div class="authentication-inner py-4">
+            <div class="row">
+              <div class="col-lg-6 col-sm-6 col-12 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <img src="{% static './assets/img/icons/unicons/wallet-info.png' %}" alt="chart success" class="rounded">
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Günlük dolum yapılan araç sayısı</span>
+                    <h3 class="card-title text-center mb-2">{{adet}}</h3>
                   </div>
                 </div>
-                <span class="fw-semibold d-block mb-1">Günlük doldurulan Litre</span>
-                <h3 class="card-title text-nowrap text-center mb-1">{{ilce}}</h3>
+              </div>
+              <div class="col-lg-6 col-sm-6 col-12 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <img src="{% static './assets/img/icons/unicons/paypal.png' %}" alt="Credit Card" class="rounded">
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Günlük doldurulan Litre</span>
+                    <h3 class="card-title text-nowrap text-center mb-1">{{liter}}</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <h4 class="mb-2">Yakıt Doldurma Ekranı 🔒</h4>
+                <p class="mb-4">Yakıt doldurmak isteğiniz aracın plakasını giriniz.</p>
+                <form id="formAuthentication" class="mb-3"  method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                    <label for="email" class="form-label">Plaka</label>
+                    <input type="text" class="form-control" id="tags"  name="plate" placeholder="plaka" autofocus="" required>
+                  </div>
+                  <button class="btn btn-primary d-grid w-100">Yakıt Yükleme</button>
+                </form>
+                
               </div>
             </div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-body">
-            <h4 class="mb-2">Yakıt Doldurma Ekranı 🔒</h4>
-            <p class="mb-4">Yakıt doldurmak isteğiniz aracın plakasını giriniz.</p>
-            <form id="formAuthentication" class="mb-3"  method="POST">
-                {% csrf_token %}
-                <div class="mb-3">
-                <label for="email" class="form-label">Plaka</label>
-                <input type="text" class="form-control" id="tags"  name="plate" placeholder="plaka" autofocus="" required>
-              </div>
-              <button class="btn btn-primary d-grid w-100">Yakıt Yükleme</button>
-            </form>
-            
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+    </div>
+</div>
 {% endif %}
 {% endblock %}

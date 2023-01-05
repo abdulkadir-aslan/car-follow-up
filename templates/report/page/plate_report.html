@@ -30,8 +30,12 @@
     </div>
 <div class="row">
   <div class="col-md-12" >
-    <canvas id="myChart" width="600" height="200"></canvas>
-
+    <div class="card mb-4">
+      {% if car %}
+        <h5 class="card-header text-center">{{car}}-{{car.brand|upper}}-{{car.model|upper}}-{{car.get_vehicle_type_display}}</h5>
+      {% endif %}
+      <canvas id="myChart" width="600" height="200"></canvas>
+    </div>
 
 <script>
     var ctx = document.getElementById("myChart").getContext('2d');
@@ -41,7 +45,7 @@
               labels: ['OCAK','ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN', 'TEMMUZ','AĞUSTOS'
             ,'EYLÜL','EKİM','KASIM','ARALIK'],
               datasets: [{
-                  label: '"{{car}}" Grafiği',
+                  label: 'Aylık Grafiği',
                   data: {{default}},
                   fill: false,
                     borderColor: 'rgb(75, 192, 192)',
@@ -68,7 +72,7 @@
           yAxes: [{
             scaleLabel: {
               display: true,
-              labelString: 'km/lt'
+              labelString: 'km/lt (1 Litrede yapılan km)'
             }
           }]
         }

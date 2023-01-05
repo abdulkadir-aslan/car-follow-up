@@ -23,7 +23,9 @@ urlpatterns = [
     path("refueling",refueling,name="refueling"),
     path("register_new_fueling",register_new_fueling,name="register_new_fueling"),
     path("fuels_delete/<int:myid>/",fuelsDelete,name="fuels_delete"),
-]   
-
+]
 urlpatterns += static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL,document_root = settings.STATIC_ROOT)
+
+handler404 = "page.views.page_not_found"
+handler500 = "page.views.page_not_found_500"

@@ -7,15 +7,17 @@
         {% if sel_item %}
         <div class="container-xxl flex-grow-1 container-p-y">
           <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kullanıcılar /</span><u>{{sel_item.username}}</u>  Düzenleme</h4>
-
           <div class="row">
               <div class="col-md-12">
                 <ul class="nav nav-pills flex-column flex-md-row mb-3">
                     <li class="nav-item">
-                    <a class="nav-link active" href="{% url 'users_home' %}"><i class="bx bx-user me-1"></i> Hesaplar</a>
+                    <a class="nav-link " href="{% url 'users_home' %}"><i class="bx bx-user me-1"></i> Hesaplar</a>
                     </li>
                     <li class="nav-item">
                     <a class="nav-link" href="{% url 'register' %}"><i class="bx bx-bell me-1"></i> Yeni Hesap</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link active" href="#"><i class="bx bx-user me-1"></i> Kullanıcı Düzenleme</a>
                     </li>
                 </ul>
                       <!-- Register Card -->
@@ -25,7 +27,7 @@
                       {% csrf_token %}
                       <div class="row">
                         <div class="mb-3 col-md-6">
-                          <label for="username" class="form-label">Username **</label>
+                          <label for="username" class="form-label">Kullanıcı Adı **</label>
                           <input type="text" value="{{sel_item.username}}" class="form-control" id="username" name="username" placeholder="Enter your username"readonly autofocus="" required>
                         </div>
                         <div class="mb-3 col-md-6">
@@ -35,11 +37,11 @@
                       </div>
                       <div class="row">
                         <div class="mb-3 col-md-6">
-                          <label for="username" class="form-label">Firstname **</label>
+                          <label for="username" class="form-label">Adı **</label>
                           <input type="text" value="{{sel_item.first_name}}" class="form-control" id="username" name="first_name" placeholder="Enter your username" autofocus="" required>
                         </div>
                         <div class="mb-3 col-md-6">
-                          <label for="username" class="form-label">Lastname **</label>
+                          <label for="username" class="form-label">Soyadı **</label>
                           <input type="text"value="{{sel_item.last_name}}" class="form-control text-uppercase" id="username" name="last_name" placeholder="Enter your Lastname" autofocus="" required>
                         </div>
                       </div>
