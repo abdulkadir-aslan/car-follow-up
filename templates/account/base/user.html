@@ -74,15 +74,16 @@
     {% endblock user %}
 
     <!-- / Content -->
-
+    {% if user.is_authenticated %}
     <div class="buy-now">
       <a
         href="{% url 'logout' %}"
-        target="_blank"
         class="btn btn-danger btn-buy-now"
         >{{ request.user.get_full_name }}<br>
         Oturumu Kapat</a>
     </div>
+    {% endif %}
+    
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->

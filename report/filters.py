@@ -33,6 +33,7 @@ class CarFilter(django_filters.FilterSet):
             "vehicle_type",
             "possession",
             "department",
+            "status",
         ]
         exclude = ['customer','create_at ']
    

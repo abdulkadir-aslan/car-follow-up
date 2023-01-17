@@ -36,6 +36,8 @@
    <link rel="stylesheet" href="{% static './assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css' %}" />
 
      <!-- Page CSS -->
+     <link rel="stylesheet" href="{% static './assets/vendor/css/pages/page-misc.css' %}">
+     
      <script src="{% static './assets/vendor/js/Chart.min.js' %}"></script>
      <!-- Helpers -->
      <script src="{% static './assets/vendor/js/helpers.js' %}"></script>
@@ -50,7 +52,7 @@
 
     <!-- Error -->
     <div class="container-xxl container-p-y">
-      <div class="misc-wrapper">
+      <div class="misc-wrapper" style="text-align: center;">
         <h2 class="mb-2 mx-2">Sayfa Bulunamdı :(</h2>
         <p class="mb-4 mx-2">Oops! 😖 İstenilen Sayfa Bulunamadı.</p>
         <a href="{% url 'home' %}" class="btn btn-primary">Anasayfa'ya dön</a>

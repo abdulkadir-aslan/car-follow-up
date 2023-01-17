@@ -67,6 +67,7 @@ coverage.xml
 *.pot
 
 # Django stuff:
+*/migrations/[0-9]*
 *.log
 local_settings.py
 db.sqlite3

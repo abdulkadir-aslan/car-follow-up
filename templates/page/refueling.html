@@ -53,6 +53,9 @@
     </div>
   </div>
 {% else %}
+{% if request.user.is_superuser %}
+  <a href="{% url 'home' %}" class="btn btn-primary">Anasayfa Sayfaya Git</a>
+{% endif %}
 <div class="container-xxl">
     <div class="authentication-wrapper authentication-basic container-p-y">
       <div class="row">

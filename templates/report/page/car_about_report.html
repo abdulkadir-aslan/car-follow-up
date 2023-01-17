@@ -29,6 +29,10 @@
                           {% render_field myFilter.form.contry class="form-select color-dropdown" %}
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label" for="selectPlacement">Durum</label>
+                            {% render_field myFilter.form.status class="form-select color-dropdown" %}
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label" for="selectPlacement">Plaka</label>
                             {% render_field myFilter.form.plate class="form-control" oninput="this.value = this.value.toUpperCase()" type="input" placeholder="Plaka" %}
                     </div>
