@@ -112,6 +112,7 @@
                             <option value="11"{% if sel_item.department == '11'  %}selected=""{% endif %}>ABONE İŞLERİ</option>
                             <option value="12"{% if sel_item.department == '12'  %}selected=""{% endif %}>TEFTİŞ KURULU</option>
                             <option value="13"{% if sel_item.department == '13'  %}selected=""{% endif %}>HUKUK MÜŞAVİRLİĞİ</option>
+                            <option value="14"{% if sel_item.department == '14'  %}selected=""{% endif %}>GENEL MÜDÜRLÜK</option>
                           </select>
                         </div>
                         </div>
@@ -235,36 +236,36 @@
                                     </div>
                             </div>
                             <div class="col-sm-12 col-md-7">
-                                <ul class="pagination justify-content-end px-4">
-                                    {% if car.has_previous %}
-                                        <li class="page-item" >
-                                            <a class="page-link" href="?page={{ car.previous_page_number }}" >
-                                                ← Önceki
-                                            </a>
-                                        </li>
-                                    {% endif%}
-                                    {% for page_number in car.adjusted_elided_pages %}
-                                        {% if page_number == car.paginator.ELLIPSIS %}
-                                            <li >{{page_number}}</li>
-                                        {% else %}
-                                        <li class="page-item {% if page_number == car.number %}active{% endif %}" >
-                                            <a  href="?page={{ page_number }}"
-                                            class="page-link {% if page_number == car.number %}current{% endif %}">
-                                            {{page_number}}
-                                            </a>
-                                        </li>
-                                        {% endif %}
-                                    {% endfor %} 
-                                    
-                                    {% if car.has_next %}
-                                        <li class="page-item" >
-                                            <a class="page-link" href="?page={{ car.next_page_number }}" >
-                                                Sonraki →
-                                            </a>
-                                        </li>
-                                    {% endif%}
-                                    </ul>
-                            </div>
+                              <ul class="pagination justify-content-end px-4">
+                                  {% if car.has_previous %}
+                                      <li class="page-item" >
+                                          <a class="page-link" href="{% my_url car.previous_page_number 'page' request.GET.urlencode %}" >
+                                              ← Önceki
+                                          </a>
+                                      </li>
+                                  {% endif%}
+                                  {% for page_number in car.adjusted_elided_pages %}
+                                      {% if page_number == car.paginator.ELLIPSIS %}
+                                          <li >{{page_number}}</li>
+                                      {% else %}
+                                      <li class="page-item {% if page_number == car.number %}active{% endif %}" >
+                                          <a  href="{% my_url page_number 'page' request.GET.urlencode %}"
+                                          class="page-link {% if page_number == car.number %}current{% endif %}">
+                                          {{page_number}}
+                                          </a>
+                                      </li>
+                                      {% endif %}
+                                  {% endfor %} 
+                                  
+                                  {% if car.has_next %}
+                                      <li class="page-item" >
+                                          <a class="page-link" href="{% my_url car.next_page_number 'page' request.GET.urlencode %}" >
+                                              Sonraki →
+                                          </a>
+                                      </li>
+                                  {% endif%}
+                                  </ul>
+                          </div>
                         </div>
                 </nav>
                     </div>

@@ -56,7 +56,8 @@ HEAD_OF_DEPARTMENT = (
     ("10","YATIRIM İNŞAAT"),
     ("11","ABONE İŞLERİ"),
     ("12","TEFTİŞ KURULU"),
-    ("13","HUKUK MÜŞAVİRLİĞİ")
+    ("13","HUKUK MÜŞAVİRLİĞİ"),
+    ("14","GENEL MÜDÜRLÜK")
 )
     
 class Car(models.Model):

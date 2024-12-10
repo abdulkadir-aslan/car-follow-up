@@ -28,16 +28,15 @@
             </form>
         </div>
     </div>
+    {% if car %}
+  {% endif %}
 <div class="row">
   <div class="col-md-12" >
     <div class="card mb-4">
-      {% if car %}
-        <h5 class="card-header text-center">{{car}}-{{car.brand|upper}}-{{car.model|upper}}-{{car.get_vehicle_type_display}}</h5>
-      {% endif %}
+      <h5 class="card-header text-center">{{car}}-{{car.brand|upper}}-{{car.model|upper}}-{{car.get_vehicle_type_display}}</h5>
       <canvas id="myChart" width="600" height="200"></canvas>
     </div>
-
-<script>
+  <script>
     var ctx = document.getElementById("myChart").getContext('2d');
     var myChart = new Chart(ctx, {
         type: 'line',// 'bar','line','polarArea'
@@ -69,12 +68,23 @@
       //HERE COMES THE AXIS Y LABEL
       options : {
         scales: {
-          yAxes: [{
-            scaleLabel: {
-              display: true,
-              labelString: 'km/lt (1 Litrede yapılan km)'
-            }
-          }]
+          xAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: {{ car }},
+            ticks: {
+          padding: 20
+        }
+          }
+        }],
+        yAxes: [{
+    display: true,
+    scaleLabel: {
+      display: true,
+      labelString: 'Value'
+    },
+  }]
         }
       }
     });
