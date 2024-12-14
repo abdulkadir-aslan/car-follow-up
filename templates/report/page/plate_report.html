@@ -28,67 +28,72 @@
             </form>
         </div>
     </div>
-    {% if car %}
-  {% endif %}
-<div class="row">
-  <div class="col-md-12" >
-    <div class="card mb-4">
-      <h5 class="card-header text-center">{{car}}-{{car.brand|upper}}-{{car.model|upper}}-{{car.get_vehicle_type_display}}</h5>
-      <canvas id="myChart" width="600" height="200"></canvas>
-    </div>
-  <script>
-    var ctx = document.getElementById("myChart").getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'line',// 'bar','line','polarArea'
-          data: {
-              labels: ['OCAK','ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN', 'TEMMUZ','AĞUSTOS'
-            ,'EYLÜL','EKİM','KASIM','ARALIK'],
-              datasets: [{
-                  label: 'Aylık Grafiği',
-                  data: {{default}},
-                  fill: false,
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1,
+    <div class="row">
+      <div class="col-md-12" >
+        <div class="card mb-4">
+          {% if car %}
+            <h5 class="card-header text-center">{{car}}-{{car.brand|upper}}-{{car.model|upper}}-{{car.get_vehicle_type_display}}</h5>
+          {% endif %}
+          <canvas id="myChart" width="600" height="200"></canvas>
+        </div>
+
+        <script>
+          var ctx = document.getElementById("myChart").getContext('2d');
+          var myChart = new Chart(ctx, {
+              type: 'line', // 'bar','line','polarArea'
+              data: {
+                  labels: ['OCAK', 'ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN', 'TEMMUZ', 'AĞUSTOS',
+                           'EYLÜL', 'EKİM', 'KASIM', 'ARALIK'],
+                  datasets: [{
+                      label: 'Aylık Grafiği',
+                      data: {{default}},
+                      fill: false,
+                      borderColor: 'rgb(75, 192, 192)',
+                      tension: 0.1,
+                  },
+                  {
+                      label: 'Yıllık Ortalama Grafiği',
+                      data: {{default1}},
+                      fill: false,
+                      borderColor: 'rgb(75, 80, 192)',
+                      tension: 0.1,
+                  },
+                  {
+                      label: 'Tüm "{{ car.get_vehicle_type_display }}" Araçların Yıllık Ortalama Grafiği ',
+                      data: {{default2}},
+                      fill: false,
+                      borderColor: "#FF1654",
+                      tension: 0.1,
+                  }]
               },
-              {
-                label: 'Yıllık Ortalama Grafiği',
-                data: {{default1}},
-                fill: false,
-                borderColor: 'rgb(75, 80, 192)',
-                tension: 0.1,
-              },
-              {
-                  label: 'Tüm "{{ car.get_vehicle_type_display }}" Araçların Yıllık Ortalama Grafiği ',
-                  data: {{default2}},
-                  fill: false,
-                    borderColor: "#FF1654",
-                    tension: 0.1,
-              }]
-          },
-      //HERE COMES THE AXIS Y LABEL
-      options : {
-        scales: {
-          xAxes: [{
-          display: true,
-          scaleLabel: {
-            display: true,
-            labelString: {{ car }},
-            ticks: {
-          padding: 20
-        }
-          }
-        }],
-        yAxes: [{
-    display: true,
-    scaleLabel: {
-      display: true,
-      labelString: 'Value'
-    },
-  }]
-        }
-      }
-    });
-  </script>
+              options: {
+                  plugins: {
+                      title: {
+                          display: true,
+                          text: 'Araç Verisi Aylık ve Yıllık Performans Grafiği', // Başlık metni
+                          font: {
+                              size: 18,
+                              weight: 'bold'
+                          },
+                          padding: {
+                              top: 20,
+                              bottom: 30
+                          }
+                      }
+                  },
+                  scales: {
+                      y: {
+                          title: {
+                              display: true,
+                              text: 'km/lt (1 Litrede yapılan km)' // Y-ekseninin başlığı
+                          }
+                      }
+                  }
+              }
+          });
+      </script>
+      
+
   </div> 
 </div>
 
