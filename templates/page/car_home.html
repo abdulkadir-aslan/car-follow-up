@@ -190,7 +190,7 @@
                             {% for item in car %}
                                 <tr>
                                     <td scope="row">{{ car.number|to_start|add:forloop.counter }}</td> 
-                                    <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.plate}}</strong></td>
+                                    <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.plate|plaka_duzenle}}</strong></td>
                                         <td>{{item.brand|upper}}</td>
                                         <td>{{item.model|upper}} </td>
                                         <td>{{item.debit}} </td>

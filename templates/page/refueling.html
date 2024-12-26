@@ -71,7 +71,7 @@
                       <i class="tf-icons bx bx-message-square-x"></i>
                     </a>
                   {% endif %}
-                  <strong>{{item.car.plate}}</strong> 
+                  <strong>{{item.car.plate|plaka_duzenle}}</strong> 
                   <span class="badge bg-label-primary me-1">{{item.liter}}L</span>
                   <span class="badge bg-label-warning me-1">{{item.kilometer}}KM</span>
                 </label>

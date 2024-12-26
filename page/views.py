@@ -10,6 +10,61 @@ from django.db.models import ProtectedError
 from django.core.paginator import Paginator
 from report.filters import PlateFilter,FuelPlateFilter
 
+@login_required(login_url="login")
+def dataload(request):
+    a = request.GET.get('data')
+    table_data = []
+    loaddata = []
+    if a is not None:
+        for item in a.splitlines():
+            items = item.split(",")
+            if Car.objects.filter(plate = items[0].replace(" ", "").upper()).exists():
+                messages.add_message(
+                        request,messages.WARNING,
+                        f'"{items[0]}" Plakalı araç sisteme kayıtlı.Mevcut kayıt üzerinden işlem yapabilirsiniz.')
+                return redirect("dataload")
+            if len(item.split(",")) == 12:
+                loaddata.append(Car(
+                    plate= items[0].replace(" ", "").upper(),
+                    brand= items[1].upper(),
+                    model= items[2].upper(),
+                    debit= items[3].upper(),
+                    title= items[4].upper(),
+                    kilometer= items[5],
+                    vehicle_type= items[6],
+                    contry= items[7],
+                    department= items[8],
+                    possession= items[9],
+                    comment= items[11].upper()
+                    ))
+                table_data.append({
+                    'plate': items[0].replace(" ", "").upper(),
+                    'brand': items[1].upper(),
+                    'model': items[2].upper(),
+                    'debit': items[3].upper(),
+                    'title': items[4].upper(),
+                    'kilometer': items[5],
+                    'vehicle_type': items[6],
+                    'contry': items[7],
+                    'department': items[8],
+                    'possession': items[9],
+                    'create_at': items[10],
+                    'comment': items[11].upper()
+                    })                
+            elif len(item.split(",")) <= 2:
+                pass
+            else:
+                messages.add_message(
+                        request,messages.WARNING,
+                        f'"{item}" Bilgiler istenilen formda değil.')
+                return redirect("dataload") 
+        if len(loaddata) >=1:
+            Car.objects.bulk_create(loaddata)
+            messages.add_message(
+                            request,messages.SUCCESS,
+                            f'Araç bilgileri veri tabanına eklendi.')
+
+    return render(request ,'dataload.html',{'table_data': table_data})
 
 @login_required(login_url="login")
 def index(request):
@@ -90,7 +145,6 @@ def carDelete(request,myid):
                             f'*{ car.plate }* Plaka diğer tablolarda kullanılmakta.Araç kaydını silmek için diğer tablolardan kayıtlı verileri silmelisiniz.!Aracı *PASİF* duruma getirebilirsiniz.' )
     return redirect('cars_home')
 
-
 @login_required(login_url="login")
 @admin_only
 def register_new_car(request):
@@ -169,10 +223,10 @@ def refueling(request):
         "fuel" : a
     }
     if request.method == "POST":
-        plate = request.POST["plate"]
+        plate = request.POST["plate"].replace(" ", "").upper()
         if plate != "":
             try:
-                car = Car.objects.get(plate=plate.upper())
+                car = Car.objects.get(plate=plate)
                 previous_amount = Fuell.objects.filter(car = car).order_by('-create_at')
                 if car.status == "passive":
                     messages.add_message(
@@ -198,12 +252,13 @@ def refueling(request):
                 f'*{plate}* Plakalı araç kayıtlarda bulunmamaktadır.')
     return render(request,"page/refueling.html",context)
 
+
 @login_required(login_url="login")
 def register_new_fueling(request):
     user =User.objects.get(username=request.user.username) 
     if request.method == "POST":
         data = request.POST
-        car = Car.objects.get(plate = data['plate'])
+        car = Car.objects.get(plate = data['plate'].replace(" ", "").upper())
         previous_amount = Fuell.objects.filter(car = car).order_by('-create_at')
         if len(previous_amount) > 0:
             previous_amount = int(previous_amount[0].kilometer)

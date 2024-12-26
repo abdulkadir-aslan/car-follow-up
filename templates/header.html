@@ -130,36 +130,42 @@
                 </li>
               </ul>
             </li>
-            
-              <li class="menu-item {% if url_name in 'general_report' or url_name == 'plate_report' or url_name == 'car_about_report' or url_name == 'lt_km_report' %}active open {% endif %}">
-                <a href="#4" class="menu-link menu-toggle">
-                  <i class="menu-icon tf-icons bx bxs-report"></i>
-                  <div data-i18n="Form Elements">Raporlama</div>
+            <li class="menu-item {% if url_name in 'general_report' or url_name == 'plate_report' or url_name == 'car_about_report' or url_name == 'lt_km_report' %}active open {% endif %}">
+              <a href="#4" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bxs-report"></i>
+                <div data-i18n="Form Elements">Raporlama</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item {% if url_name == 'general_report'  %}active {% endif %}">
+                  <a href="{% url 'general_report' %}" class="menu-link">
+                    <div data-i18n="Basic Inputs">Genel Raporlama</div>
+                  </a>
+                </li>
+                <li class="menu-item {% if url_name == 'car_about_report'  %}active {% endif %}">
+                  <a href="{% url 'car_about_report' %}" class="menu-link">
+                    <div data-i18n="Input groups">Araç Bilgileri Raporlama</div>
+                  </a>
+                </li>
+                <li class="menu-item {% if url_name == 'lt_km_report'  %}active {% endif %}">
+                  <a href="{% url 'lt_km_report' %}" class="menu-link">
+                    <div data-i18n="Input groups">Km/Lt Raporlama</div>
+                  </a>
+                </li>
+                <li class="menu-item {% if url_name == 'plate_report'  %}active {% endif %}">
+                  <a href="{% url 'plate_report' %}" class="menu-link">
+                    <div data-i18n="Input groups">Plaka Raporlama</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            {% if request.user.is_staff %}
+              <li class="menu-item {% if url_name == 'dataload' %}active {% endif %}">
+                <a href="{% url 'dataload' %}" class="menu-link">
+                  <i class="menu-icon tf-icons bx bx-collection"></i>
+                  <div data-i18n="Basic">Toplu Veri Girişi</div>
                 </a>
-                <ul class="menu-sub">
-                  <li class="menu-item {% if url_name == 'general_report'  %}active {% endif %}">
-                    <a href="{% url 'general_report' %}" class="menu-link">
-                      <div data-i18n="Basic Inputs">Genel Raporlama</div>
-                    </a>
-                  </li>
-                  <li class="menu-item {% if url_name == 'car_about_report'  %}active {% endif %}">
-                    <a href="{% url 'car_about_report' %}" class="menu-link">
-                      <div data-i18n="Input groups">Araç Bilgileri Raporlama</div>
-                    </a>
-                  </li>
-                  <li class="menu-item {% if url_name == 'lt_km_report'  %}active {% endif %}">
-                    <a href="{% url 'lt_km_report' %}" class="menu-link">
-                      <div data-i18n="Input groups">Km/Lt Raporlama</div>
-                    </a>
-                  </li>
-                  <li class="menu-item {% if url_name == 'plate_report'  %}active {% endif %}">
-                    <a href="{% url 'plate_report' %}" class="menu-link">
-                      <div data-i18n="Input groups">Plaka Raporlama</div>
-                    </a>
-                  </li>
-                </ul>
               </li>
-            
+            {% endif %}
           </ul>
           {% endwith %}
         </aside>

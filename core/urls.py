@@ -7,6 +7,8 @@ from page.views import *
 
 urlpatterns = [
     path('', index,name='home'),
+    #Dataload
+    path('dataload/',dataload,name="dataload"),
     #Reports
     path('report/',include('report.urls')),
     #account

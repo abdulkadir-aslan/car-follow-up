@@ -1,7 +1,15 @@
 from django import template
 from datetime import datetime,timedelta
+import re
 
 register = template.Library()
+
+@register.filter()
+
+def plaka_duzenle(plaka):
+    # Sayı ve harfleri ayırma
+    plaka_duzenli = re.sub(r'(\d+)([a-zA-Z]+)(\d+)', r'\1 \2 \3', plaka)
+    return plaka_duzenli
 
 @register.filter()
 def date_day(value):

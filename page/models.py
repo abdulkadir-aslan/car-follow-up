@@ -80,7 +80,7 @@ class Car(models.Model):
         return self.plate
     
     def save(self, *args, **kwargs):
-        self.plate = self.plate.upper()
+        self.plate = self.plate.replace(" ", "").upper()
         return super(Car, self).save(*args, **kwargs)
     
    

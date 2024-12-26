@@ -144,6 +144,7 @@ def plate_report(request):
         'default1':default1,
         'default2':default2
     }
+    print(context)
     return render(request,'report/page/plate_report.html',context)
 
 #Export exel

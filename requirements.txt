@@ -6,3 +6,4 @@ setuptools==75.6.0
 sqlparse==0.4.3
 tzdata==2022.7
 xlwt==1.3.0
+python-dotenv==1.0.1

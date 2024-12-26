@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load tag_library %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Veri /</span> Veri Yükleme</h4>
+    <div class="row">
+        <div class="col-xl">
+          <div class="card mb-4">
+            
+            <div class="card-body">
+              <form method="GET">
+                <div class="mb-3">
+                  <label class="form-label" for="basic-default-message">Araç Bilgisi <i><b> "Plaka,Marka,Model,Zimmet,Ünvan,Kilometre,Araç Tipi,İlçe,Daire Başkanlığı,SahipliK,Kayıt Tarihi,Açıklaman"</b></i></label>
+                  <textarea name="data" id="basic-default-message" class="form-control" placeholder="'Plaka,Marka,Model,Zimmet,Ünvan,Kilometre,Araç Tipi,İlçe,Daire Başkanlığı,SahipliK,Kayıt Tarihi,Açıklama' formatında veri girişi yapınız." style="height: 110px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+              </form>
+              {% if table_data %}
+              <hr>
+                  <div class="table-responsive text-nowrap">
+                    <table class="table table-hover" >
+                    <thead>
+                        <tr>
+                        <th>Plaka</th>
+                        <th>Marka</th>
+                        <th>Model</th>
+                        <th>Zimmet</th>
+                        <th>Ünvan</th>
+                        <th>Kilometre</th>
+                        <th>Araç Tipi</th>
+                        <th>İlçe</th>
+                        <th>Daire Başkanlığı</th>
+                        <th>SahipliK</th>
+                        <th>Kayıt Tarihi</th>
+                        <th>Açıklama</th>
+
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        {% for item in table_data %}
+                            <tr>
+                                <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.plate}}</strong></td>
+                                    <td>{{item.brand|upper}}</td>
+                                    <td>{{item.model|upper}} </td>
+                                    <td>{{item.debit}} </td>
+                                    <td>{{item.title}} </td>
+                                    <td>{{item.kilometer}} </td>
+                                    <td>{{item.vehicle_type}}</td>
+                                    <td>{{item.contry}}</td>
+                                    <td>{{item.department}}</td>
+                                    <td>{{item.possession}}</td>
+                                    <td>{{item.create_at}} </td>
+                                    <td>{{item.comment}} </td>
+                            </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                    </table>
+                    
+                  </div>
+                  
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+      </div>
+</div>
+
+
+{% endblock content %}
