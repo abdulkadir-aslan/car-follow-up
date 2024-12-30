@@ -4,12 +4,13 @@ from django.contrib.auth.decorators import login_required
 from account.models import User
 from page.models import Car,Fuell
 from page.decorators import *
-from account.forms import CarForm
+from account.forms import CarForm,FuellForm
 from django.contrib import messages
 from django.db.models import ProtectedError
 from django.core.paginator import Paginator
 from report.filters import PlateFilter,FuelPlateFilter
 
+@admin_only
 @login_required(login_url="login")
 def dataload(request):
     a = request.GET.get('data')
@@ -252,7 +253,6 @@ def refueling(request):
                 f'*{plate}* Plakalı araç kayıtlarda bulunmamaktadır.')
     return render(request,"page/refueling.html",context)
 
-
 @login_required(login_url="login")
 def register_new_fueling(request):
     user =User.objects.get(username=request.user.username) 
@@ -299,6 +299,30 @@ def fuels_home(request):
         "myFilter": myFilter,
     }
     return render(request ,'page/refueling_home.html',context)
+
+@login_required(login_url="login")
+@admin_only
+def editfuels(request,id):
+    fuell = Fuell.objects.get(id=id)
+    if request.method == "POST":
+        form = FuellForm(request.POST or None, instance=fuell)
+        if form.is_valid():
+            previous_amount = Fuell.objects.filter(car = fuell.car.id).order_by('-create_at')
+            if len(previous_amount) > 0:
+                previous_amount = int(previous_amount[1].kilometer)
+            else:
+                previous_amount = int(fuell.car.kilometer)
+            fuell.average = (int(form.data["kilometer"])-previous_amount)/int(form.data["liter"])
+            fuell.save()
+            form.save()
+            messages.add_message(
+                request,messages.SUCCESS,
+                f'*{fuell.car.plate}* Aracı için yakıt bilgileri güncellendi.')
+            return redirect('fuels_home')
+    else:
+        form =FuellForm(instance=fuell)
+        
+    return render(request,'page/fuell_edit.html',{'form':form,'fuel':fuell})
 
 @login_required(login_url="login")
 def fuelsDelete(request,myid):

@@ -20,7 +20,10 @@ TYPE_CAR = (
     ("screwer","VİDANJÖR"),
     ("driling_machine","SONDAJ MAKİNASI"),
     ("forklift","FORKLIFT"),
-    ("generator","JENERATÖR")
+    ("generator","JENERATÖR"),
+    ("bucget","KEPÇE JCB"),
+    ("tractor","TRAKTÖR"),
+    ("transit","TRANSİT"),
 )
 
 OWNERSHİP = (

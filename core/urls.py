@@ -21,6 +21,7 @@ urlpatterns = [
     path("car_edit/<int:myid>/",carEdit,name="car_edit"),
     path("update_car/<int:myid>/",update_car,name="update_car"),
     #Fuel
+    path("edit_fuell/<int:id>",editfuels,name="editfuels"),
     path("fuels_home",fuels_home,name="fuels_home"),
     path("refueling",refueling,name="refueling"),
     path("register_new_fueling",register_new_fueling,name="register_new_fueling"),

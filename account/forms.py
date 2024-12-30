@@ -18,7 +18,6 @@ class LoginForm(forms.Form):
             }
         )
     )
-    
 
 class SignUpForm(UserCreationForm):
     class Meta:
@@ -38,9 +37,6 @@ class SignUpForm(UserCreationForm):
         self.fields['email'].widget.attrs = {'class': 'form-control', 'placeholder': 'name@example.com'}
         self.fields['password1'].widget.attrs = {'class': 'form-control', 'placeholder': 'Confirm password','required': 'required'}
         self.fields['password2'].widget.attrs = {'class': 'form-control', 'placeholder': 'Confirm password','required': 'required'}
-
-
-
 
 class SignUpEditForm(UserCreationForm):
     username = forms.CharField(
@@ -101,7 +97,6 @@ class CarForm(forms.ModelForm):
             'contry' :forms.Select(attrs={'class': 'form-select'},),
         }
 
-
 class UpdateUserForm(UserCreationForm):
     password1 = forms.CharField(
         widget=forms.PasswordInput(
@@ -121,3 +116,11 @@ class UpdateUserForm(UserCreationForm):
         model = User
         fields = ('password1','password2')
     
+class FuellForm(forms.ModelForm):
+    class Meta:
+        model = Fuell
+        fields = [
+            'kilometer',
+            'liter',
+            'delivery',
+        ]
