@@ -7,6 +7,8 @@ from page.views import *
 
 urlpatterns = [
     path('', index,name='home'),
+    #audit log
+    path('audit_log/',audit_log_view,name="audit_log"),
     #Dataload
     path('dataload/',dataload,name="dataload"),
     #Reports

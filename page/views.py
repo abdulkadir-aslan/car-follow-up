@@ -2,7 +2,7 @@ from datetime import datetime,date,timedelta
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from account.models import User
-from page.models import Car,Fuell
+from page.models import Car,Fuell,ChangeHistory
 from page.decorators import *
 from account.forms import CarForm,FuellForm
 from django.contrib import messages
@@ -350,3 +350,15 @@ def fuelsDelete(request,myid):
             request,messages.SUCCESS,
             f"*{fuel.car}* Plakalı araç için '{fuel.create_at}' tarihindeki yakıt doldurma fişi silinmiştir.")
     return redirect('fuels_home')
+
+@login_required(login_url="login")
+@admin_only
+def audit_log_view(request):
+    logs = ChangeHistory.objects.all().order_by('-timestamp')
+    
+    # Sayfalama
+    paginator = Paginator(logs, 10)  # Sayfada 10 kayıt göster
+    page_number = request.GET.get('page')  # Sayfa numarasını al
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'page/audit_log.html', {'page_obj': page_obj})

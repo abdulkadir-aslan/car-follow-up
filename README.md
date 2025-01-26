@@ -7,6 +7,9 @@ Reporting of the daily, weekly, and monthly fuel loading indices of the vehicles
 - User login and logout
 - User authorization
 - Filtering
+- Signals
+- Middleware
+- Decorators
 
 ## Installation
 
@@ -58,9 +61,6 @@ Reporting of the daily, weekly, and monthly fuel loading indices of the vehicles
 
 - `core/`: Main project directory.
   - `settings`: Main project settings.
-    - `base.py`: Basic configuration
-    - `development.py`: Development configuration
-    - `production.py`: publish configuration
   - `urls.py`: URL routing.
   - `wsgi.py`: WSGI configuration.
 - `account/`: User actions directory.
@@ -72,6 +72,8 @@ Reporting of the daily, weekly, and monthly fuel loading indices of the vehicles
 - `page/`: Home operations directory.
     - `admin.py`: Admin configuration.
     - `models.py`: Database models.
+    - `middleware.py`: Middleware functions.
+    - `signals.py` : Signals functions.
     - `views.py`: View functions.
     - `decorators.py/`: Decorators function.
     - `urls.py`: URL routing for the 
@@ -93,3 +95,7 @@ Reporting of the daily, weekly, and monthly fuel loading indices of the vehicles
 ## Acknowledgments
 
 - [Django Documentation](https://docs.djangoproject.com/en/3.2/)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

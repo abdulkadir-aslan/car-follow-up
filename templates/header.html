@@ -165,6 +165,12 @@
                   <div data-i18n="Basic">Toplu Veri Girişi</div>
                 </a>
               </li>
+              <li class="menu-item {% if url_name == 'audit_log' %}active {% endif %}">
+                <a href="{% url 'audit_log' %}" class="menu-link">
+                  <i class="menu-icon tf-icons bx bx-crown"></i>
+                  <div data-i18n="Boxicons">Log Kayıtları</div>
+                </a>
+              </li>
             {% endif %}
           </ul>
           {% endwith %}

@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import Car,Fuell
+from .models import Car,Fuell,ChangeHistory
+
+class ChangeHistoryAdmin(admin.ModelAdmin):
+    list_display = ('model_name', 'object_id', 'field_name', 'old_value', 'new_value', 'change_type', 'user', 'timestamp')
+    list_filter = ('model_name', 'change_type', 'timestamp')
+
+admin.site.register(ChangeHistory, ChangeHistoryAdmin)
 
 # Register your models here.
 class BlockNewCar(admin.ModelAdmin):

@@ -1,6 +1,6 @@
 from django.db import models
 from account.models import User
-from django.utils.text import slugify
+from .middleware import get_current_user
 
 
 STATUS= (
@@ -62,7 +62,46 @@ HEAD_OF_DEPARTMENT = (
     ("13","HUKUK MÜŞAVİRLİĞİ"),
     ("14","GENEL MÜDÜRLÜK")
 )
+
+class ChangeHistory(models.Model):
+    model_name = models.CharField(max_length=255)
+    object_id = models.PositiveIntegerField()
+    field_name = models.CharField(max_length=255)
+    old_value = models.TextField(null=True, blank=True)
+    new_value = models.TextField(null=True, blank=True)
+    change_type = models.CharField(max_length=50)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.model_name} ({self.object_id}) - {self.field_name} changed by {self.user} at {self.timestamp}"
+
+    def get_verbose_name(self):
+        # Bu yöntemi kullanarak field_name'in verbose_name'ini alabilirsiniz.
+        model_class = globals()[self.model_name]  # Model ismini sınıf adı olarak çözümle
+        field = model_class._meta.get_field(self.field_name)  # Modelin alanını al
+        return field.verbose_name  # verbose_name değerini döndür
     
+    def get_old_value_display(self):
+        if hasattr(self, 'old_value') and self.old_value:
+            model_class = globals()[self.model_name]
+            field = model_class._meta.get_field(self.field_name)
+            if field.choices:
+                return dict(field.choices).get(self.old_value, self.old_value)
+        return self.old_value
+
+    def get_new_value_display(self):
+        if hasattr(self, 'new_value') and self.new_value:
+            model_class = globals()[self.model_name]
+            field = model_class._meta.get_field(self.field_name)
+            if field.choices:
+                return dict(field.choices).get(self.new_value, self.new_value)
+        return self.new_value
+    
+    class Meta:
+        verbose_name = 'Change History'
+        verbose_name_plural = 'Change Histories'
+
 class Car(models.Model):
     plate = models.CharField(verbose_name="Plaka",max_length=15,unique=True,null=False,blank=False)
     brand = models.CharField(verbose_name="Marka",max_length=30,null=False,blank=False)
@@ -79,15 +118,48 @@ class Car(models.Model):
     update_at =models.DateTimeField(auto_now=True)
     status = models.CharField(verbose_name="Durum",choices=STATUS,default=DEFAULT_STATUS,max_length=7,blank=False)
     
+    def save(self, *args, **kwargs):
+        self.plate = self.plate.replace(" ", "").upper()
+        user = get_current_user()  # Kullanıcı bilgisini almak
+
+        if self.pk:  # Eğer nesne zaten veritabanında varsa
+            old_instance = Car.objects.get(pk=self.pk)
+            changed_fields = self._detect_changes(old_instance)
+
+            # Değişiklikleri kaydet
+            for field, (old_value, new_value) in changed_fields.items():
+                if field == "kilometer":
+                    continue
+                ChangeHistory.objects.create(
+                    model_name=self.__class__.__name__,
+                    object_id=self.pk,
+                    field_name=field,
+                    old_value=old_value,
+                    new_value=new_value,
+                    change_type='update',
+                    user=user,
+                )
+
+        super().save(*args, **kwargs)
+
+    def _detect_changes(self, old_instance):
+        """
+        Mevcut nesne ile eski nesne arasındaki değişiklikleri tespit eder.
+        """
+        changes = {}
+        for field in self._meta.fields:
+            field_name = field.name
+            old_value = getattr(old_instance, field_name, None)
+            new_value = getattr(self, field_name, None)
+
+            if old_value != new_value:
+                changes[field_name] = (old_value, new_value)
+
+        return changes
+    
     def __str__(self):
         return self.plate
     
-    def save(self, *args, **kwargs):
-        self.plate = self.plate.replace(" ", "").upper()
-        return super(Car, self).save(*args, **kwargs)
-    
-   
-   
 class Fuell(models.Model):
     user = models.ForeignKey(User,null=False,on_delete=models.PROTECT)
     car = models.ForeignKey(Car,null=False,on_delete=models.PROTECT)
@@ -99,5 +171,39 @@ class Fuell(models.Model):
     create_at = models.DateTimeField(auto_now_add=True)
     update_at =models.DateTimeField(auto_now=True)
     
+    
+    def save(self, *args, **kwargs):
+        user = get_current_user()  # Kullanıcı bilgisini almak
+        if self.pk:  # Eğer nesne zaten veritabanında varsa
+            old_instance = Fuell.objects.get(pk=self.pk)
+            changed_fields = self._detect_changes(old_instance)
+            # Değişiklikleri kaydet
+            for field, (old_value, new_value) in changed_fields.items():
+                ChangeHistory.objects.create(
+                    model_name=self.__class__.__name__,
+                    object_id=self.pk,
+                    field_name=field,
+                    old_value=old_value,
+                    new_value=new_value,
+                    change_type='update',
+                    user=user,
+                )
+
+        super().save(*args, **kwargs)
+
+    def _detect_changes(self, old_instance):
+        """
+        Mevcut nesne ile eski nesne arasındaki değişiklikleri tespit eder.
+        """
+        changes = {}
+        for field in self._meta.fields:
+            field_name = field.name
+            old_value = getattr(old_instance, field_name, None)
+            new_value = getattr(self, field_name, None)
+
+            if old_value != new_value:
+                changes[field_name] = (old_value, new_value)
+
+        return changes
     def __str__(self):
         return self.contry
