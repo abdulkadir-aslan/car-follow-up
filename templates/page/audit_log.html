@@ -45,11 +45,11 @@
                   <td>{{ log.get_new_value_display }}</td>
                 {% endif %}
                 {% if log.change_type == "update" %}
-                    <td><span class="badge bg-label-success me-1">Düzenlendi</span></td>
-                {% elif log.change_type == "update" %}
+                    <td><span class="badge bg-label-success me-1"> Düzenlendi</span></td>
+                {% elif log.change_type == "create" %}
                     <td><span class="badge bg-label-info me-1">Oluşturuldu</span></td>
                 {% else %}
-                    <td><span class="badge bg-label-warning me-1">Silindi</span></td>
+                    <td><span class="badge bg-label-warning me-1"> Silindi</span></td>
                 {% endif %}
                 <td>{{ log.user.first_name|upper }} {{log.user.last_name}}</td>
                 <td>{{ log.timestamp }}</td>

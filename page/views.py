@@ -1,4 +1,5 @@
 from datetime import datetime,date,timedelta
+import calendar
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from account.models import User
@@ -76,7 +77,7 @@ def index(request):
         dateTomorrow = dateNow + timedelta(days=1)
         yesterday = dateNow + timedelta(days= -1)
         yesterday = fuel.filter(create_at__range=(date(yesterday.year,yesterday.month,yesterday.day),date(dateNow.year,dateNow.month,dateNow.day)))
-        month = fuel.filter(create_at__range=(date(dateNow.year,dateNow.month,1),date(dateNow.year,dateNow.month,31)))
+        month = fuel.filter(create_at__range=(date(dateNow.year,dateNow.month,1),date(dateNow.year,dateNow.month,calendar.monthrange(dateNow.year, dateNow.month)[1])))        
         year = fuel.filter(create_at__range=(date(dateNow.year,1,1),date(dateNow.year,12,31)))
         a = fuel.filter(create_at__range=(date(dateNow.year,dateNow.month,dateNow.day),date(dateTomorrow.year,dateTomorrow.month,dateTomorrow.day)))
         akcakale = sum([item.liter for item in a.filter(contry="akçakale")])
