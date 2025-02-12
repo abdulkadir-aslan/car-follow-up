@@ -60,7 +60,10 @@ HEAD_OF_DEPARTMENT = (
     ("11","ABONE İŞLERİ"),
     ("12","TEFTİŞ KURULU"),
     ("13","HUKUK MÜŞAVİRLİĞİ"),
-    ("14","GENEL MÜDÜRLÜK")
+    ("14","GENEL MÜDÜRLÜK"),
+    ("15","ELEKTRİK MAKİNE VE MALZEME İKMAL"),
+    ("16","KORUMA VE GÜVENLİK HİZMETLERİ"),
+    ("17","MÜŞTERİ HİZMETLERİ VE KURUMSAL İLETİŞİM"),
 )
 
 class ChangeHistory(models.Model):
@@ -165,7 +168,7 @@ class Fuell(models.Model):
     car = models.ForeignKey(Car,null=False,on_delete=models.PROTECT)
     contry = models.CharField(verbose_name="iLÇE",null=False,max_length=11,blank=False)
     kilometer = models.CharField(verbose_name="Kilometre",max_length=20,null=False,blank=False)
-    average = models.FloatField(verbose_name="ortalamaYakıt",null=False,blank=False)
+    average = models.FloatField(verbose_name="Ortalama Yakıt",null=False,blank=False)
     liter = models.IntegerField(verbose_name="Litre",blank=False,null=False)
     delivery = models.CharField(verbose_name="Teslim alan",max_length=30,null=False,blank=False)
     create_at = models.DateTimeField(auto_now_add=True)

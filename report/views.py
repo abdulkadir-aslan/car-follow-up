@@ -13,7 +13,7 @@ from django.http import HttpResponse
 
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def general_report(request):
     fuel = Fuell.objects.select_related("car","user").all().order_by('-create_at')
     myFilter = OrderFilter(request.GET,queryset=fuel)
@@ -39,7 +39,7 @@ def general_report(request):
     return render(request,'report/page/general_report.html',context)
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def car_about_report(request):
     car = Car.objects.select_related().all().order_by('-create_at')
     myFilter = CarFilter(request.GET,queryset=car)
@@ -65,7 +65,7 @@ def car_about_report(request):
     return render(request,'report/page/car_about_report.html',context)
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def lt_km_report(request):
     car = Fuell.objects.select_related("car","user").all().order_by('-create_at')
     myFilter = LiterFilter(request.GET,queryset=car)
@@ -104,7 +104,7 @@ def calculate(data):
         return (sum_data/count_data)
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def plate_report(request):
     default = []
     default1 = []

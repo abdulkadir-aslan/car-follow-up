@@ -13,7 +13,7 @@ def admin_only(view_func):
 
 def employe_only(view_func):
     def wrapper_function(request, *args, **kwargs):
-        if (request.user.is_admin) or (request.user.is_employee) or (request.user.is_maneger):
+        if (request.user.is_staff) and (request.user.is_active) :
             return view_func(request, *args, **kwargs)
         else:
             return HttpResponse('Bu sayfaya Erişim izniniz bulunmamaktadır.')

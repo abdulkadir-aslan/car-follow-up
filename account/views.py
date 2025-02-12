@@ -45,9 +45,8 @@ def logout_request(request):
     logout(request)
     return redirect("login")
 
-
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def register_request(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
@@ -66,14 +65,14 @@ def register_request(request):
     return render(request,"account/page/register.html",context={'form':form})
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def users_home(request):
     context = dict()
     context["users"]= get_user_model().objects.all()
     return render(request ,'account/page/login_home.html',context)
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def userDelete(request,myid):
     user = User.objects.get(id=myid)
     if user.is_superuser:
@@ -93,7 +92,7 @@ def userDelete(request,myid):
     return redirect('users_home')
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def userEdit(request,myid):
     user = User.objects.get(id=myid)
     context = {
@@ -103,7 +102,7 @@ def userEdit(request,myid):
     return render(request,'account/page/login_home.html',context)
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def updateUser(request,myid):
     user = User.objects.get(id=myid)
     if request.method == "POST":
@@ -130,6 +129,8 @@ def updateUser(request,myid):
         form = SignUpEditForm() 
     return render(request,"account/page/register.html")
         
+@login_required(login_url="login")
+@employe_only
 def update_password(request,myid):
     user = User.objects.get(username=myid)
     if request.method == "POST":

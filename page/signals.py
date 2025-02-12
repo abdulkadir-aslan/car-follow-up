@@ -41,11 +41,15 @@ def track_branch_creation_or_update(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Fuell)
 @receiver(post_delete, sender=Car)
 def track_branch_deletion(sender, instance, **kwargs):
-    user = get_current_user()  # Kullanıcı bilgisini al
+    user = get_current_user()  
+    if sender.__name__ == "Fuell":
+        field_name = f"{(str(instance.pk))}-{instance.user}-{instance.contry}-{instance.kilometer}-{instance.liter}-{instance.delivery}-{str(instance.create_at)}"
+    else:
+        field_name =f"{instance.plate}-{instance.brand}-{instance.model}-{instance.vehicle_type}-{instance.debit}-{instance.title}-{instance.kilometer}-{instance.possession}-{instance.comment}-{instance.department}-{instance.contry}-{str(instance.create_at)}"
     ChangeHistory.objects.create(
         model_name=sender.__name__,
         object_id=instance.pk,
-        field_name='N/A',
+        field_name=field_name,
         old_value=str(instance),
         new_value=None,
         change_type='delete',

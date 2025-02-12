@@ -71,7 +71,7 @@ def dataload(request):
 @login_required(login_url="login")
 def index(request):
     context = dict()
-    if request.user.is_superuser:
+    if request.user.is_superuser or request.user.is_staff:
         fuel = Fuell.objects.select_related("car","user").all()
         dateNow = datetime.now().date()
         dateTomorrow = dateNow + timedelta(days=1)
@@ -109,7 +109,7 @@ def page_not_found_500(request):
     return render(request,"404-error.html")
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def cars_home(request):
     car = Car.objects.select_related().all().order_by('-create_at')
     myFilter = PlateFilter(request.GET,queryset=car)
@@ -133,7 +133,7 @@ def cars_home(request):
     return render(request ,'page/car_home.html',context)
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def carDelete(request,myid):
     car = Car.objects.get(id=myid)
     try:
@@ -148,7 +148,7 @@ def carDelete(request,myid):
     return redirect('cars_home')
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def register_new_car(request):
     if request.method == "POST":
         form = CarForm(request.POST)
@@ -172,7 +172,7 @@ def register_new_car(request):
     return render(request,"page/register_new_car.html",context={'form':form})
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def carEdit(request,myid):
     car = Car.objects.get(id=myid)
     context = {
@@ -182,7 +182,7 @@ def carEdit(request,myid):
     return render(request,'page/car_home.html',context)
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def update_car(request,myid):
     car = Car.objects.get(id=myid)
     if request.method == "POST":
@@ -278,7 +278,7 @@ def register_new_fueling(request):
     return render(request,"page/refuling.html")
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def fuels_home(request):
     fuel= Fuell.objects.select_related("car","user").all().order_by('-create_at')
     myFilter = FuelPlateFilter(request.GET,queryset=fuel)
@@ -302,14 +302,14 @@ def fuels_home(request):
     return render(request ,'page/refueling_home.html',context)
 
 @login_required(login_url="login")
-@admin_only
+@employe_only
 def editfuels(request,id):
     fuell = Fuell.objects.get(id=id)
     if request.method == "POST":
         form = FuellForm(request.POST or None, instance=fuell)
         if form.is_valid():
             previous_amount = Fuell.objects.filter(car = fuell.car.id).order_by('-create_at')
-            if len(previous_amount) > 0:
+            if len(previous_amount) > 1:
                 previous_amount = int(previous_amount[1].kilometer)
             else:
                 previous_amount = int(fuell.car.kilometer)
