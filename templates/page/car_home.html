@@ -5,7 +5,7 @@
 {% load tag_library %}
 
 {% block content%}
-        {% if sel_item %}
+        {% if form %}
         <div class="container-xxl flex-grow-1 container-p-y">
   
           <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Araçlar /</span>Yeni Araç</h4>
@@ -23,115 +23,74 @@
                 <!-- Register Card -->
                 <div class="card">
                   <div class="card-body">
-                    <form id="formAuthentication"action="{% url 'update_car' sel_item.id %}" class="mb-3" method="POST">
+                    <form id="formAuthentication"action="" class="mb-3" method="POST">
                       {% csrf_token %}
                       <div class="row">
                         <div class="mb-3 col-md-6">
                           <label for="username" class="form-label">Plaka **</label>
-                          <input type="text" class="form-control" value="{{sel_item.plate}}" id="username" name="plate" placeholder="Plaka'yı giriniz" autofocus=""readonly required>
+                          <input type="text" name="plate" value="{{form.plate.value}}" class="form-control" placeholder="Plaka" maxlength="30" required readonly>
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="username" class="form-label">Marka **</label>
-                            <input type="text" class="form-control" value="{{sel_item.brand}}" id="username" name="brand" placeholder="Araç markasını giriniz" autofocus="" required>
+                            {{form.brand}}
                           </div>
                       </div>
                       <div class="row">
                         <div class="mb-3 col-md-6">
                           <label for="username" class="form-label">Model **</label>
-                          <input type="text" class="form-control" value="{{sel_item.model}}" id="username" name="model" placeholder="Araç modelini giriniz" autofocus="" required>
+                          {{form.model}}
                         </div>
                         <div class="mb-3 col-md-6">
                           <label for="username" class="form-label">Kilometre **</label>
-                          <input type="text" value="{{sel_item.kilometer}}"class="form-control text-uppercase" id="username" name="kilometer" placeholder="Araç teslim alınma Kilometre'sini giriniz" autofocus="" required>
+                          {{form.kilometer}}
                         </div>
                       </div>
                       <div class="row">
                         <div class="mb-3 col-md-6">
                         <label for="defaultFormControlInput" class="form-label">Zimmet</label>
-                        <input type="text" class="form-control" value="{{sel_item.debit}}" name="debit" id="defaultFormControlInput" placeholder="Adı-soyadı(zimmetlinin) " aria-describedby="defaultFormControlHelp">
+                        {{form.debit}}
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="defaultFormControlInput" class="form-label">Ünvan</label>
-                            <input type="text" class="form-control" value="{{sel_item.title}}" name="title" id="defaultFormControlInput" placeholder="Zimmetlinin ünvanı" aria-describedby="defaultFormControlHelp">
+                            {{form.title}}
                         </div>
                       </div>
                       <div class="row">
                         <div class="mb-3 col-md-6">
                           <label for="defaultSelect" class="form-label">Araç Cinsi</label>
-                          <select id="defaultSelect" name="vehicle_type" class="form-select">
-                            <option value="mount"{% if sel_item.vehicle_type == 'mount'  %}selected=""{% endif %}>BİNEK</option>
-                            <option value="pick_up"{% if sel_item.vehicle_type == 'pick_up'  %}selected=""{% endif %}>PİCK UP</option>
-                            <option value="truck"{% if sel_item.vehicle_type == 'truck'  %}selected=""{% endif %}>KAMYON</option>
-                            <option value="water_tanker"{% if sel_item.vehicle_type == 'water_tanker'  %}selected=""{% endif %}>SU TANKERİ</option>
-                            <option value="motorcycle"{% if sel_item.vehicle_type == 'motorcycle'  %}selected=""{% endif %}>MOTOSİKLET</option>
-                            <option value="loader_exvator"{% if sel_item.vehicle_type == 'loader_exvator'  %}selected=""{% endif %}>YÜKLEYİCİ EKSKAVATÖR</option>
-                            <option value="driling_machine"{% if sel_item.vehicle_type == 'driling_machine'  %}selected=""{% endif %}>SONDAJ MAKİNASI</option>
-                            <option value="forklift"{% if sel_item.vehicle_type == 'forklift'  %}selected=""{% endif %}>FORKLIFT</option>
-                            <option value="generator"{% if sel_item.vehicle_type == 'generator'  %}selected=""{% endif %}>JENERATÖR</option>
-                          </select>
+                          {{form.vehicle_type}}
+                          
                         </div>
                         <div class="mb-3 col-md-6">
                           <label for="defaultSelect" class="form-label">Bağlı Olduğu İlçe</label>
-                          <select id="defaultSelect" name="contry" class="form-select">
-                            <option value="akçakale" {% if sel_item.contry == 'akçakale'  %}selected=""{% endif %} >AKÇAKALE</option>
-                            <option value="birecik" {% if sel_item.contry == 'birecik'  %}selected=""{% endif %}>BİRECİK</option>
-                            <option value="bozova" {% if sel_item.contry == 'bozova'  %}selected=""{% endif %} >BOZOVA</option>
-                            <option value="ceylanpınar" {% if sel_item.contry == 'ceylanpınar'  %}selected=""{% endif %}>CEYLANPINAR</option>
-                            <option value="halfeti" {% if sel_item.contry == 'halfeti'  %}selected=""{% endif %} >HALFETİ</option>
-                            <option value="harran" {% if sel_item.contry == 'harran'  %}selected=""{% endif %}>HARRAN</option>
-                            <option value="hilvan" {% if sel_item.contry == 'hilvan'  %}selected=""{% endif %} >HİLVAN</option>
-                            <option value="siverek" {% if sel_item.contry == 'siverek'  %}selected=""{% endif %}>SİVEREK</option>
-                            <option value="suruç" {% if sel_item.contry == 'suruç'  %}selected=""{% endif %} >SURUÇ</option>
-                            <option value="viranşehir" {% if sel_item.contry == 'viranşehir'  %}selected=""{% endif %}>VİRANŞEHİR</option>
-                            <option value="merkez" {% if sel_item.contry == 'merkez'  %}selected=""{% endif %} >MERKEZ</option>
-                          </select>
+                          {{form.contry}}
+                         
                         </div>
                       </div>
                       <div class="row">
                         <div class="mb-3 col-md-6">
                           <label for="defaultSelect" class="form-label">SahipliK durumu</label>
-                          <select id="defaultSelect" name="possession" class="form-select">
-                            <option value="contractor"{% if sel_item.possession == 'contractor'  %}selected=""{% endif %}>MÜTAHİT</option>
-                            <option value="corporation"{% if sel_item.possession == 'corporation'  %}selected=""{% endif %}>KURUM</option>
-                            <option value="forrent"{% if sel_item.possession == 'forrent'  %}selected=""{% endif %}>KİRALIK</option>
-                          </select>
+                          {{form.possession}}
+                          
                         </div>
                         <div class="mb-3 col-md-6">
                           <label for="defaultSelect" class="form-label">Daire Başkanlığı</label>
-                          <select id="defaultSelect" name="department" class="form-select">
-                            <option value="1"{% if sel_item.department == '1'  %}selected=""{% endif %}>İNSAN KAYNAKLARI</option>
-                            <option value="2"{% if sel_item.department == '2'  %}selected=""{% endif %}>MALİ HİZMETLER</option>
-                            <option value="3"{% if sel_item.department == '3'  %}selected=""{% endif %}>ARITMA TESİSLERİ</option>
-                            <option value="4"{% if sel_item.department == '4'  %}selected=""{% endif %}>BİLGİ İŞLEM</option>
-                            <option value="5"{% if sel_item.department == '5'  %}selected=""{% endif %}>DESTEK HİZMETLERİ</option>
-                            <option value="6"{% if sel_item.department == '6'  %}selected=""{% endif %}>İÇME SUYU VE KANALİZASYON</option>
-                            <option value="7"{% if sel_item.department == '7'  %}selected=""{% endif %}>PLAN VE PROJE</option>
-                            <option value="8"{% if sel_item.department == '8'  %}selected=""{% endif %}>STRATEJİ GELİŞTİRME</option>
-                            <option value="9"{% if sel_item.department == '9'  %}selected=""{% endif %}>SU VE ATIK SU TEKNOLOJİLERİ</option>
-                            <option value="10"{% if sel_item.department == '10'  %}selected=""{% endif %}>YATIRIM İNŞAAT</option>
-                            <option value="11"{% if sel_item.department == '11'  %}selected=""{% endif %}>ABONE İŞLERİ</option>
-                            <option value="12"{% if sel_item.department == '12'  %}selected=""{% endif %}>TEFTİŞ KURULU</option>
-                            <option value="13"{% if sel_item.department == '13'  %}selected=""{% endif %}>HUKUK MÜŞAVİRLİĞİ</option>
-                            <option value="14"{% if sel_item.department == '14'  %}selected=""{% endif %}>GENEL MÜDÜRLÜK</option>
-                          </select>
+                          {{form.department}}
+                          
                         </div>
                         </div>
                       <div class="mb-3 col-md-6">
                         <label for="exampleFormControlTextarea1" class="form-label">Açıklama</label>
-                        <input type="text" value="{{sel_item.comment}}" class="form-control" name="comment" placeholder="Açıklama" aria-describedby="floatingInputHelp">
+                        {{form.comment}}
                       </div>
                       <br>
                       <h6>Durum</h6>
                       <div class="col-sm-4">
-                        <select id="sendNotification" class="form-select" name="status">
-                          <option value="passive" {% if sel_item.status == 'passive'  %}selected=""{% endif %}>Pasif</option>
-                          <option value="active"{% if sel_item.status == 'active'  %}selected=""{% endif %}>Aktif</option>
-                        </select>
+                        {{form.status}}
                       </div>
                       <br>
                       <button class="btn btn-primary d-grid w-100" value="Register">Kaydet</button>
-                    </form>
-        
+                    </form>        
                   </div>
                 </div>
                 <!-- Register Card -->
@@ -215,8 +174,8 @@
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                             </button>
                                             <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{% url 'car_edit' item.id %}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
-                                            <a class="dropdown-item" href="{% url 'car_delete' item.id %}"><i class="bx bx-trash me-1"></i> Delete</a>
+                                            <a class="dropdown-item" href="{% url 'update_car' item.id %}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                            <a class="dropdown-item delete-btn" href="{% url 'car_delete' item.id %}"><i class="bx bx-trash me-1"></i> Delete</a>
                                             </div>
                                         </div>
                                         </td>
@@ -277,4 +236,19 @@
               </div>
             </div>
         {% endif %}
+
+<script>
+  $(document).ready(function() {
+      // Silme butonuna tıklanma olayını dinliyoruz
+      $('.delete-btn').click(function(e) {
+          e.preventDefault(); // Linkin yönlendirmesini engelle
+          var url = $(this).attr('href'); // Silme URL'sini al
+          // Onay penceresini göster
+          if (confirm("Bu öğeyi silmek istediğinizden emin misiniz?")) {
+              // Onaylandıysa, URL'ye yönlendir
+              window.location.href = url;
+          }
+      });
+  });
+</script>
 {% endblock %}

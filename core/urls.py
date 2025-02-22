@@ -8,6 +8,7 @@ from page.views import *
 urlpatterns = [
     path('', index,name='home'),
     #audit log
+    path("log_delete/<int:log_id>/",log_delete,name="log_delete"),
     path('audit_log/',audit_log_view,name="audit_log"),
     #Dataload
     path('dataload/',dataload,name="dataload"),
@@ -20,7 +21,6 @@ urlpatterns = [
     path("cars_home",cars_home,name="cars_home"),
     path("car_delete/<int:myid>/",carDelete,name="car_delete"),
     path("register_new_car",register_new_car,name="register_new_car"),
-    path("car_edit/<int:myid>/",carEdit,name="car_edit"),
     path("update_car/<int:myid>/",update_car,name="update_car"),
     #Fuel
     path("edit_fuell/<int:id>",editfuels,name="editfuels"),

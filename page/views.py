@@ -1,6 +1,6 @@
 from datetime import datetime,date,timedelta
 import calendar
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from account.models import User
 from page.models import Car,Fuell,ChangeHistory
@@ -173,33 +173,12 @@ def register_new_car(request):
 
 @login_required(login_url="login")
 @employe_only
-def carEdit(request,myid):
-    car = Car.objects.get(id=myid)
-    context = {
-        'sel_item' :car,
-        'car':Car.objects.all()
-    }
-    return render(request,'page/car_home.html',context)
-
-@login_required(login_url="login")
-@employe_only
 def update_car(request,myid):
     car = Car.objects.get(id=myid)
     if request.method == "POST":
-        form = CarForm(request.POST)
-        if (form.is_valid()) or (car.plate == form.data["plate"]):
-            car.brand = form.data["brand"]
-            car.model = form.data["model"]
-            car.debit = form.data["debit"]
-            car.title = form.data["title"]
-            car.kilometer = form.data["kilometer"]
-            car.comment = form.data["comment"]
-            car.status = form.data["status"]
-            car.vehicle_type = form.data["vehicle_type"]
-            car.department = form.data["department"]
-            car.possession = form.data["possession"]
-            car.contry = form.data["contry"]
-            car.save()
+        form = CarForm(request.POST or None, instance=car)
+        if (form.is_valid()):
+            form.save()
             messages.add_message(
                         request,messages.SUCCESS,
                         f'*{ car.plate }* Plakalı araç bilgileri güncellendi')
@@ -209,8 +188,11 @@ def update_car(request,myid):
                         request,messages.WARNING,
                         form.errors.as_text())
     else:
-        form = CarForm() 
-    return render(request,"account/page/register.html")
+        form = CarForm(instance=car) 
+    context = {
+        'form' :form,
+    }
+    return render(request,'page/car_home.html',context)
 
 @login_required(login_url="login")
 def refueling(request):
@@ -363,3 +345,11 @@ def audit_log_view(request):
     page_obj = paginator.get_page(page_number)
     
     return render(request, 'page/audit_log.html', {'page_obj': page_obj})
+
+def log_delete(request, log_id):
+    log = get_object_or_404(ChangeHistory, id=log_id)
+    log.delete()
+    messages.add_message(
+    request,messages.SUCCESS,
+            f" Log kaydı silinmiştir.")
+    return redirect('audit_log')

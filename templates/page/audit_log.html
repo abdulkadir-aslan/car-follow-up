@@ -22,6 +22,7 @@
             <th>Durum</th>
             <th>Kullanıcı</th>
             <th>Tarih</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody class="table-border-bottom-0">
@@ -53,6 +54,7 @@
                 {% endif %}
                 <td>{{ log.user.first_name|upper }} {{log.user.last_name}}</td>
                 <td>{{ log.timestamp }}</td>
+                <td><a class="btn btn-outline-danger delete-btn" href="{% url 'log_delete' log.id %}"><i class="bx bx-trash me-1"></i>Delete</a></td>
             </tr>
         {% empty %}
             <tr>
@@ -105,5 +107,18 @@
 
     </div>
   </div>
-
+  <script>
+    $(document).ready(function() {
+        // Silme butonuna tıklanma olayını dinliyoruz
+        $('.delete-btn').click(function(e) {
+            e.preventDefault(); // Linkin yönlendirmesini engelle
+            var url = $(this).attr('href'); // Silme URL'sini al
+            // Onay penceresini göster
+            if (confirm("Bu öğeyi silmek istediğinizden emin misiniz?")) {
+                // Onaylandıysa, URL'ye yönlendir
+                window.location.href = url;
+            }
+        });
+    });
+  </script>
 {% endblock %}
