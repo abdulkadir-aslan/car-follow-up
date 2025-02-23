@@ -337,7 +337,7 @@ def fuelsDelete(request,myid):
 @login_required(login_url="login")
 @admin_only
 def audit_log_view(request):
-    logs = ChangeHistory.objects.all().order_by('-timestamp')
+    logs = ChangeHistory.objects.select_related().all().order_by('-timestamp')
     
     # Sayfalama
     paginator = Paginator(logs, 10)  # Sayfada 10 kayıt göster

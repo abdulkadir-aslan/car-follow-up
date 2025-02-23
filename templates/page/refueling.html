@@ -67,7 +67,7 @@
               {% for item in fuel %}
                 <label class="list-group-item">
                   {% if item.create_at|date_day %}
-                    <a class="btn btn-icon btn-outline-danger" title="sil"  href="{% url 'fuels_delete' item.id %}">
+                    <a class="delete-btn btn btn-icon btn-outline-danger " title="sil"  href="{% url 'fuels_delete' item.id %}">
                       <i class="tf-icons bx bx-message-square-x"></i>
                     </a>
                   {% endif %}
@@ -79,6 +79,20 @@
             </div>
           </div>
         </div>
+        <script>
+          $(document).ready(function() {
+              // Silme butonuna tıklanma olayını dinliyoruz
+              $('.delete-btn').click(function(e) {
+                  e.preventDefault(); // Linkin yönlendirmesini engelle
+                  var url = $(this).attr('href'); // Silme URL'sini al
+                  // Onay penceresini göster
+                  if (confirm("Bu öğeyi silmek istediğinizden emin misiniz?")) {
+                      // Onaylandıysa, URL'ye yönlendir
+                      window.location.href = url;
+                  }
+              });
+          });
+        </script>
         {% endif %}
         <div class="{% if adet > 0 %} col-lg-6 {% else %} col-lg-12 {% endif %} col-sm-12 col-12 mb-4">
           <div class="authentication-inner py-4">
@@ -131,4 +145,5 @@
     </div>
 </div>
 {% endif %}
+
 {% endblock %}
