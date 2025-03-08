@@ -60,6 +60,7 @@
                                 <th>Plaka</th>
                                 <th>İlçe</th>
                                 <th>Kilometre</th>
+                                <th>Yakıt Türü</th>
                                 <th>Litre</th>
                                 <th title="1 Lt'de yapılan km">km/lt</th>
                                 <th>Teslim Alan</th>
@@ -73,6 +74,16 @@
                                     <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.car}}</strong></td>
                                     <td ><span style="text-transform:uppercase;">{{item.contry}}</span> </td>
                                     <td>{{item.kilometer}} </td>
+                                    <td>
+                                        {% if item.fuel_type == "TÜP" %}
+                                        <span class="badge bg-label-warning me-1">{{item.fuel_type}}</span>
+                                        {% elif item.fuel_type == "BENZİN" %} 
+                                        <span class="badge bg-label-primary me-1">{{item.fuel_type}}</span>
+                                        {% else %}
+                                        <span class="badge bg-label-success me-1">{{item.fuel_type}}</span>
+                                        {% endif %}
+                                        
+                                    </td>
                                     <td>{{item.liter}} </td>
                                     {% if item.average|to_int > filters %}
                                     <td><span class="badge bg-label-warning me-1">{{item.average | floatformat}}</span></td>

@@ -19,27 +19,46 @@
             <form id="formAuthentication" action="{% url 'register_new_fueling' %}" class="mb-3" method="POST">
                 {% csrf_token %}
                 <div class="mb-3">
-                <label for="username" class="form-label">Plaka</label>
-                <input type="text" value="{{sel_item.plate}}" class="form-control" id="username" name="plate" placeholder="Enter your username"readonly autofocus="">
-              </div>
-              <div class="mb-3">
-                <label for="email" class="form-label">Araç Bilgileri</label>
-                <input type="text" value="{{sel_item.get_vehicle_type_display}} - {{sel_item.brand|upper}} - {{sel_item.model|upper}}"  class="form-control" id="email" name="email" required  readonly>
-              </div>
-              <div class="mb-3 ">
-                <label for="username" class="form-label">Kilometre **</label>
-                <input type="number"  class="form-control" id="username" min="{{previous_amount}}"  name="kilometer" placeholder="Araç km'sini giriniz"  autofocus="" required>
-              </div>
-              <div class="mb-3 ">
-                <label for="username" class="form-label">Aldığı Litre **</label>
-                <input type="number" class="form-control" id="username" name="liter" placeholder="Litre" autofocus="" required>
-              </div>
-            <div class="mb-3 ">
-                <label for="username" class="form-label">Teslim Alan **({{sel_item.debit}})  </label>
-                <input type="text" class="form-control" id="username" name="delivery" placeholder="Yakıtı teslim alan" autofocus="" required>
-              </div>
-              <button class="btn btn-primary d-grid w-100">Kaydet</button>
+                  <label for="username" class="form-label">Plaka</label>
+                  <input type="text" value="{{sel_item.plate}}" class="form-control" id="username" name="plate" placeholder="Enter your username"readonly autofocus="">
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Araç Bilgileri</label>
+                  <input type="text" value="{{sel_item.get_vehicle_type_display}} - {{sel_item.brand|upper}} - {{sel_item.model|upper}}"  class="form-control" id="email" name="email" required  readonly>
+                </div>
+                <div class="mb-3">
+                  <label for="fuel_type" class="form-label">Yakıt Türü</label>
+                  {% if sel_item.fuel_type == "gasoline_gas" %}
+                    <select name="fuel_type" class="form-select" required>
+                      <option value="" selected="">---------</option>
+                      <option value="TÜP">TÜP</option>
+                      <option value="BENZİN">BENZİN</option>
+                    </select>
+                  {% else %}
+                    <input type="text" value="{{sel_item.get_fuel_type_display}}" class="form-control"  name="fuel_type" placeholder="Enter your username" readonly="" autofocus="">
+                  {% endif %}
+                </div>
+                <div class="mb-3 ">
+                  <label for="username" class="form-label">Kilometre **</label>
+                  <input type="number"  class="form-control" id="username" min="{{previous_amount}}"  name="kilometer" placeholder="Araç km'sini giriniz"  autofocus="" required>
+                </div>
+                <div class="mb-3 ">
+                  <label for="username" class="form-label">Aldığı Litre **</label>
+                  <input type="number" class="form-control" id="username" name="liter" placeholder="Litre" autofocus="" required>
+                </div>
+                <div class="mb-3 ">
+                    <label for="username" class="form-label">Teslim Alan **({{sel_item.debit}})  </label>
+                    <input type="text" class="form-control" id="username" name="delivery" placeholder="Yakıtı teslim alan" autofocus="" required>
+                </div>
+                {% if request.user.contry == "merkez" %}
+                  <div class="mb-3 ">
+                    <label for="username" class="form-label">Açıklama </label>
+                    <input type="text" class="form-control"  name="comment" placeholder="Açıklama" autofocus="" >
+                  </div>
+                {% endif %}
+                <button class="btn btn-primary d-grid w-100" >Kaydet</button>
             </form>
+            
             <p class="text-center">
                 <span>Yeni araç yakıt girişi?</span>
                 <a href="/refueling">
@@ -72,8 +91,9 @@
                     </a>
                   {% endif %}
                   <strong>{{item.car.plate|plaka_duzenle}}</strong> 
-                  <span class="badge bg-label-primary me-1">{{item.liter}}L</span>
-                  <span class="badge bg-label-warning me-1">{{item.kilometer}}KM</span>
+                  <span title="Alınan Yakıt Miktarı LT" class="badge bg-label-info me-1">{{item.liter|format_number}}L</span>
+                  <span title="Araç Km" class="badge bg-label-warning me-1">{{item.kilometer|format_number}}KM</span>
+                  <span title="Yakıt Tipi" class="badge bg-label-primary me-1">{{item.fuel_type}}</span>
                 </label>
               {% endfor %}
             </div>

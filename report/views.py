@@ -185,14 +185,14 @@ def export_Excel(request):
     font_style = xlwt.XFStyle()
     font_style.font.bold = True
 
-    column = ["Plaka","İlçe","Kilometre","Litre","Teslim alan","Tarih"]
+    column = ["Plaka","İlçe","Kilometre","Yakıt Tipi","Litre","Teslim alan","Açıklama","Tarih"]
 
     for col_num in range(len(column)):
         ws.write(row_num,col_num,column[col_num],font_style)
 
     font_style = xlwt.XFStyle()
 
-    rows = fuel_general_report.values_list("car__plate","contry","kilometer","liter","delivery","create_at")
+    rows = fuel_general_report.values_list("car__plate","contry","kilometer","fuel_type","liter","delivery","comment","create_at")
 
     for row in rows:
         row_num += 1
@@ -212,7 +212,7 @@ def export_Car_Excel(request):
     font_style = xlwt.XFStyle()
     font_style.font.bold = True
 
-    column = ["Plaka","Marka","Model","Araç Cinsi","Zimmet","Ünvan","Kilometre","Sahiplik","Daire Başkanlığı","iLÇE","Tarih","Durum","Açıklama"]
+    column = ["Plaka","Marka","Model","Araç Cinsi","Zimmet","Ünvan","Kilometre","Yakt Tipi","Sahiplik","Daire Başkanlığı","iLÇE","Tarih","Durum","Açıklama"]
 
     for col_num in range(len(column)):
         ws.write(row_num,col_num,column[col_num],font_style)
@@ -229,12 +229,13 @@ def export_Car_Excel(request):
         ws.write(row_num,4,row.debit.upper(),font_style)
         ws.write(row_num,5,row.title.upper(),font_style)
         ws.write(row_num,6,int(row.kilometer),font_style)
-        ws.write(row_num,7,row.get_possession_display(),font_style)
-        ws.write(row_num,8,row.get_department_display(),font_style)
-        ws.write(row_num,9,row.get_contry_display(),font_style)
-        ws.write(row_num,10,datetime.date(row.create_at),date_style)
-        ws.write(row_num,11,row.get_status_display(),font_style)
-        ws.write(row_num,12,row.comment,font_style)
+        ws.write(row_num,7,row.get_fuel_type_display(),font_style)
+        ws.write(row_num,8,row.get_possession_display(),font_style)
+        ws.write(row_num,9,row.get_department_display(),font_style)
+        ws.write(row_num,10,row.get_contry_display(),font_style)
+        ws.write(row_num,11,datetime.date(row.create_at),date_style)
+        ws.write(row_num,12,row.get_status_display(),font_style)
+        ws.write(row_num,13,row.comment,font_style)
     wb.save(response)
 
     return response

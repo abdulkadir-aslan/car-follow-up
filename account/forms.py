@@ -80,7 +80,7 @@ class CarForm(forms.ModelForm):
         fields = ('plate','brand','model',
                   'debit','title','kilometer',
                   'comment','status','vehicle_type',
-                  'possession','department','contry'
+                  'possession','department','fuel_type','contry'
         )
         widgets ={
             'plate' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Plakayı giriniz'},),
@@ -94,6 +94,7 @@ class CarForm(forms.ModelForm):
             'vehicle_type' : forms.Select(attrs={'class': 'form-select'},),
             'possession' : forms.Select(attrs={'class': 'form-select'},),
             'department' : forms.Select(attrs={'class': 'form-select'},),
+            'fuel_type' :forms.Select(attrs={'class': 'form-select'},),
             'contry' :forms.Select(attrs={'class': 'form-select'},),
         }
 

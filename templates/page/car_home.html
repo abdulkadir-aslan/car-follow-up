@@ -64,7 +64,6 @@
                         <div class="mb-3 col-md-6">
                           <label for="defaultSelect" class="form-label">Bağlı Olduğu İlçe</label>
                           {{form.contry}}
-                         
                         </div>
                       </div>
                       <div class="row">
@@ -79,9 +78,15 @@
                           
                         </div>
                         </div>
-                      <div class="mb-3 col-md-6">
-                        <label for="exampleFormControlTextarea1" class="form-label">Açıklama</label>
-                        {{form.comment}}
+                      <div class="row">
+                        <div class="mb-3 col-md-6">
+                          <label for="defaultSelect" class="form-label">Yakıt Türü</label>
+                          {{form.fuel_type}}
+                        </div>
+                        <div class="mb-3 col-md-6">
+                          <label for="exampleFormControlTextarea1" class="form-label">Açıklama</label>
+                          {{form.comment}}
+                        </div>
                       </div>
                       <br>
                       <h6>Durum</h6>
@@ -136,6 +141,7 @@
                             <th>Zimmet</th>
                             <th>Ünvan</th>
                             <th>Kilometre</th>
+                            <th>Yakıt Türü</th>
                             <th>Araç Tipi</th>
                             <th>İlçe</th>
                             <th>Daire Başkanlığı</th>
@@ -155,6 +161,7 @@
                                         <td>{{item.debit}} </td>
                                         <td>{{item.title}} </td>
                                         <td>{{item.kilometer}} </td>
+                                        <td>{{item.get_fuel_type_display}} </td>
                                         <td>{{item.get_vehicle_type_display}}</td>
                                         <td>{{item.get_contry_display}}</td>
                                         <td>{{item.get_department_display}}</td>

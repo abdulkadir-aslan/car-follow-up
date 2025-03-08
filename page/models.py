@@ -66,6 +66,12 @@ HEAD_OF_DEPARTMENT = (
     ("17","MÜŞTERİ HİZMETLERİ VE KURUMSAL İLETİŞİM"),
 )
 
+FUEL_TYPE = (
+    ("diesel","DİZEL"),
+    ("gasoline","BENZİN"),
+    ("gasoline_gas","TÜP-BENZİN"),
+)
+
 class ChangeHistory(models.Model):
     model_name = models.CharField(max_length=255)
     object_id = models.PositiveIntegerField()
@@ -110,6 +116,7 @@ class Car(models.Model):
     brand = models.CharField(verbose_name="Marka",max_length=30,null=False,blank=False)
     model = models.CharField(verbose_name="Model",max_length=30,null=False,blank=False)
     vehicle_type = models.CharField(verbose_name="Araç Cinsi",choices=TYPE_CAR,max_length=15,blank=False)
+    fuel_type = models.CharField(verbose_name="Yakıt Tipi",choices=FUEL_TYPE,default="diesel",max_length=15,blank=False)
     debit = models.CharField(verbose_name="Zimmet",max_length=30,null=False,blank=True)
     title = models.CharField(verbose_name="Ünvan",max_length=50,null=False,blank=True) 
     kilometer = models.CharField(verbose_name="Kilometre",max_length=20,null=False,blank=False)
@@ -167,13 +174,14 @@ class Fuell(models.Model):
     user = models.ForeignKey(User,null=False,on_delete=models.PROTECT)
     car = models.ForeignKey(Car,null=False,on_delete=models.PROTECT)
     contry = models.CharField(verbose_name="iLÇE",null=False,max_length=11,blank=False)
+    fuel_type = models.CharField(verbose_name="Yakıt Tipi",max_length=15,blank=True)
     kilometer = models.CharField(verbose_name="Kilometre",max_length=20,null=False,blank=False)
     average = models.FloatField(verbose_name="Ortalama Yakıt",null=False,blank=False)
     liter = models.IntegerField(verbose_name="Litre",blank=False,null=False)
     delivery = models.CharField(verbose_name="Teslim alan",max_length=30,null=False,blank=False)
     create_at = models.DateTimeField(auto_now_add=True)
     update_at =models.DateTimeField(auto_now=True)
-    
+    comment = models.TextField(verbose_name="Açıklama",blank=True)
     
     def save(self, *args, **kwargs):
         user = get_current_user()  # Kullanıcı bilgisini almak

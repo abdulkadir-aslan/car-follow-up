@@ -67,7 +67,9 @@
                                 <th >Plaka</th>
                                 <th>İlçe</th>
                                 <th>Kilometre</th>
+                                <th>Yakıt Türü</th>
                                 <th>Litre</th>
+                                <th>Açıklama</th>
                                 <th>Teslim Alan</th>
                                 <th>Tarih</th>
                             </tr>
@@ -79,8 +81,19 @@
                                     <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{item.car}}</strong></td>
                                     <td ><span style="text-transform:uppercase;">{{item.contry}}</span> </td>
                                     <td>{{ item.kilometer }} </td>
+                                    <td>
+                                        {% if item.fuel_type == "TÜP" %}
+                                        <span class="badge bg-label-warning me-1">{{item.fuel_type}}</span>
+                                        {% elif item.fuel_type == "BENZİN" %} 
+                                        <span class="badge bg-label-primary me-1">{{item.fuel_type}}</span>
+                                        {% else %}
+                                        <span class="badge bg-label-success me-1">{{item.fuel_type}}</span>
+                                        {% endif %}
+                                        
+                                    </td>
                                     <td>{{item.liter}} </td>
                                     <td>{{item.delivery}} </td>
+                                    <td>{{item.comment}} </td>
                                     <td>{{item.create_at}}</td>
                                 </tr>
                             {% endfor %}

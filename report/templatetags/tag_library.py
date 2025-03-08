@@ -1,6 +1,7 @@
 from django import template
 from datetime import datetime,timedelta
 import re
+import locale
 
 register = template.Library()
 
@@ -45,3 +46,17 @@ def my_url(value,field_name,urlencode=None):
         url = '{}&{}'.format(url,encoded_querystring)
         
     return url
+
+
+@register.filter
+def format_number(value):
+    """
+    Sayıyı 1000'lik dilimlerle ayırır ve binlik ayırıcı (nokta) kullanır.
+    """
+    try:
+        # Sayıyı formatla
+        value = float(value)
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')  # Amerikan İngilizcesi formatını kullan
+        return locale.format_string("%0.0f", value, grouping=True)
+    except (ValueError, TypeError):
+        return value

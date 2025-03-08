@@ -16,7 +16,7 @@ class BlockNewCar(admin.ModelAdmin):
 class BlockFuell(admin.ModelAdmin):
     search_fields = ("user","car")
     list_filter = ("user",)
-    list_display = ("user","car","kilometer","liter","average","create_at")
+    list_display = ("user","car","kilometer","liter","fuel_type","average","create_at")
 
 
 admin.site.register(Car,BlockNewCar)

@@ -248,8 +248,8 @@ def register_new_fueling(request):
         else:
             previous_amount = int(car.kilometer)
             
-        fuel = Fuell(user=user ,car =car ,kilometer = data["kilometer"],average=(int(data["kilometer"])-previous_amount)/int(data["liter"]),
-                     liter = data["liter"],contry=user.contry,delivery=data['delivery']
+        fuel = Fuell(user=user ,car =car ,fuel_type=data["fuel_type"],kilometer = data["kilometer"],average=(int(data["kilometer"])-previous_amount)/int(data["liter"]),
+                     liter = data["liter"],contry=user.contry,delivery=data['delivery'],comment=data['comment']
         )
         messages.add_message(
                 request,messages.SUCCESS,
