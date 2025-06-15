@@ -2,10 +2,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path,include
+from django.conf.urls import handler404, handler500
 from page.views import *
 
 
 urlpatterns = [
+    path("test-error/", test_error),
     path('', index,name='home'),
     #audit log
     path("log_delete/<int:log_id>/",log_delete,name="log_delete"),
@@ -33,4 +35,4 @@ urlpatterns += static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL,document_root = settings.STATIC_ROOT)
 
 handler404 = "page.views.page_not_found"
-handler500 = "page.views.page_not_found_500"
+handler500 = "page.views.server_error"

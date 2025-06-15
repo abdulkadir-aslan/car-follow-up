@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from page.decorators import *
 from datetime import datetime,date
+from calendar import monthrange
 from django.db.models import Sum
 from django.core.paginator import Paginator
 from .filters import OrderFilter,CarFilter,LiterFilter
@@ -15,85 +16,83 @@ from django.http import HttpResponse
 @login_required(login_url="login")
 @employe_only
 def general_report(request):
-    fuel = Fuell.objects.select_related("car","user").all().order_by('-create_at')
-    myFilter = OrderFilter(request.GET,queryset=fuel)
+    fuel = Fuell.objects.select_related("car", "user").all().order_by('-create_at')
+    myFilter = OrderFilter(request.GET, queryset=fuel)
     fuel = myFilter.qs
-    global fuel_general_report
-    fuel_general_report = fuel
-    paginator = Paginator(fuel, 10) # Show 10 contacts per page.
+
+    paginator = Paginator(fuel, 10)  # Sayfalama: her sayfada 10 kayıt
     page_number = request.GET.get("page")
     item_list = paginator.get_page(page_number)
-    if page_number is not None:
+
+    if page_number:
         item_list.adjusted_elided_pages = paginator.get_elided_page_range(page_number)
     else:
         item_list.adjusted_elided_pages = paginator.get_elided_page_range(1)
-    if fuel.count() ==0:
-        messages.add_message(
-                        request,messages.INFO,
-                        'İstenilen filtrede değerler bulunamadı.')
-        fuel = []
-    context ={
-        "fuel":item_list,
+
+    if fuel.count() == 0:
+        messages.add_message(request, messages.INFO, 'İstenilen filtrede değerler bulunamadı.')
+
+    context = {
+        "fuel": item_list,
         "myFilter": myFilter
     }
-    return render(request,'report/page/general_report.html',context)
+    return render(request, 'report/page/general_report.html', context)
 
 @login_required(login_url="login")
 @employe_only
 def car_about_report(request):
-    car = Car.objects.select_related().all().order_by('-create_at')
-    myFilter = CarFilter(request.GET,queryset=car)
+    car = Car.objects.all().order_by('-create_at')
+    myFilter = CarFilter(request.GET, queryset=car)
     car = myFilter.qs
-    global car_about_report
-    car_about_report = car
-    paginator = Paginator(car, 10) # Show 10 contacts per page.
+
+    paginator = Paginator(car, 10)
     page_number = request.GET.get("page")
     item_list = paginator.get_page(page_number)
-    if page_number is not None:
+
+    if page_number:
         item_list.adjusted_elided_pages = paginator.get_elided_page_range(page_number)
     else:
         item_list.adjusted_elided_pages = paginator.get_elided_page_range(1)
-    if car.count() ==0:
-        messages.add_message(
-                        request,messages.INFO,
-                        'İstenilen filtrede değerler bulunamadı.')
-        car = []
-    context ={
-        "car":item_list,
+
+    if not car.exists():
+        messages.info(request, 'İstenilen filtrede değerler bulunamadı.')
+
+    context = {
+        "car": item_list,
         "myFilter": myFilter
     }
-    return render(request,'report/page/car_about_report.html',context)
+    return render(request, 'report/page/car_about_report.html', context)
 
 @login_required(login_url="login")
 @employe_only
 def lt_km_report(request):
-    car = Fuell.objects.select_related("car","user").all().order_by('-create_at')
-    myFilter = LiterFilter(request.GET,queryset=car)
-    car = myFilter.qs
-    global liter_report
-    liter_report = car
-    paginator = Paginator(car, 10) # Show 10 contacts per page.
+    queryset = Fuell.objects.select_related("car", "user").all().order_by('-create_at')
+    myFilter = LiterFilter(request.GET, queryset=queryset)
+    filtered_data = myFilter.qs
+
+    paginator = Paginator(filtered_data, 10)
     page_number = request.GET.get("page")
     item_list = paginator.get_page(page_number)
-    if page_number is not None:
-        item_list.adjusted_elided_pages = paginator.get_elided_page_range(page_number)
-    else:
-        item_list.adjusted_elided_pages = paginator.get_elided_page_range(1)
-    if car.count() ==0:
-        messages.add_message(
-                        request,messages.INFO,
-                        'İstenilen filtrede değerler bulunamadı.')
-        car = []
+
+    item_list.adjusted_elided_pages = paginator.get_elided_page_range(page_number or 1)
+
+    if not filtered_data.exists():
+        messages.info(request, 'İstenilen filtrede değerler bulunamadı.')
+
+    # Opsiyonel filtreyi template'e taşımak için
     filters = ""
-    if request.GET.get("average") is not None:
-        if (request.GET["average"] != ""):
-            filters = int(request.GET.get("average"))
-    context ={
-        "fuel":item_list,
+    if request.GET.get("average"):
+        try:
+            filters = int(request.GET["average"])
+        except ValueError:
+            filters = ""
+
+    context = {
+        "fuel": item_list,
         "myFilter": myFilter,
-        "filters":filters
+        "filters": filters
     }
-    return render(request,'report/page/lt_km_report.html',context)
+    return render(request, 'report/page/lt_km_report.html', context)
 
 def calculate(data):
     sum_data = data.aggregate(Sum("average"))['average__sum']
@@ -106,136 +105,168 @@ def calculate(data):
 @login_required(login_url="login")
 @employe_only
 def plate_report(request):
-    default = []
-    default1 = []
-    default2 = []
-    cars = ''
+    monthly_data = []
+    car_data = []
+    type_data = []
+    car_instance = None
+
     if request.method == "POST":
+        plate = request.POST.get("plate", "").upper()
         try:
-            dateNow = datetime.now().date()
-            car = Car.objects.get(plate =request.POST["plate"].upper())
-            fuel = Fuell.objects.all().filter(car =car)
-            Jan = calculate(fuel.filter(create_at__range=(date(dateNow.year,1,1),date(dateNow.year,2,1))))
-            Feb = calculate(fuel.filter(create_at__range=(date(dateNow.year,2,1),date(dateNow.year,3,1))))
-            Mar = calculate(fuel.filter(create_at__range=(date(dateNow.year,3,1),date(dateNow.year,4,1))))
-            Apr = calculate(fuel.filter(create_at__range=(date(dateNow.year,4,1),date(dateNow.year,5,1))))
-            May = calculate(fuel.filter(create_at__range=(date(dateNow.year,5,1),date(dateNow.year,6,1))))
-            Jun = calculate(fuel.filter(create_at__range=(date(dateNow.year,6,1),date(dateNow.year,7,1))))
-            Jul = calculate(fuel.filter(create_at__range=(date(dateNow.year,7,1),date(dateNow.year,8,1))))
-            Aug = calculate(fuel.filter(create_at__range=(date(dateNow.year,8,1),date(dateNow.year,9,1))))
-            Sep = calculate(fuel.filter(create_at__range=(date(dateNow.year,9,1),date(dateNow.year,10,1))))
-            Oct = calculate(fuel.filter(create_at__range=(date(dateNow.year,10,1),date(dateNow.year,11,1))))
-            Nov = calculate(fuel.filter(create_at__range=(date(dateNow.year,11,1),date(dateNow.year,12,1))))
-            Dec = calculate(fuel.filter(create_at__range=(date(dateNow.year,12,1),date(dateNow.year+1,1,1))))
-            default = [Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec,Oct]
-            cars = car
-            df1 = calculate(fuel.filter(create_at__range=(date(dateNow.year,1,1),date(dateNow.year+1,1,1))))
-            fuel = Fuell.objects.all().filter(car__vehicle_type =car.vehicle_type)
-            df2 = calculate(fuel.filter(create_at__range=(date(dateNow.year,1,1),date(dateNow.year+1,1,1))))
-            default1 = [df1,df1,df1,df1,df1,df1,df1,df1,df1,df1,df1,df1]
-            default2 = [df2,df2,df2,df2,df2,df2,df2,df2,df2,df2,df2,df2]
-        except :
-            messages.add_message(
-            request,messages.INFO,
-            f'*{request.POST["plate"].upper()}* Plakası tanımlı değil.Lütfen geçerli bir plaka giriniz..')
+            car_instance = Car.objects.get(plate=plate)
+            date_now = datetime.now().date()
+
+            # İlgili aracın tüm yakıt kayıtları
+            fuel_records = Fuell.objects.filter(car=car_instance)
+
+            # Her ay için yakıt verisi hesaplama
+            for month in range(1, 13):
+                start_date = date(date_now.year, month, 1)
+                end_day = monthrange(date_now.year, month)[1]
+                end_date = date(date_now.year, month, end_day)
+                monthly = calculate(fuel_records.filter(create_at__range=(start_date, end_date)))
+                monthly_data.append(monthly)
+
+            # Yıllık toplam
+            yearly_range = (date(date_now.year, 1, 1), date(date_now.year + 1, 1, 1))
+            car_total = calculate(fuel_records.filter(create_at__range=yearly_range))
+            car_data = [car_total] * 12
+
+            # Aynı türdeki diğer araçların toplamı
+            same_type_fuel = Fuell.objects.filter(car__vehicle_type=car_instance.vehicle_type)
+            type_total = calculate(same_type_fuel.filter(create_at__range=yearly_range))
+            type_data = [type_total] * 12
+
+        except Car.DoesNotExist:
+            messages.info(request, f'*{plate}* plakası tanımlı değil. Lütfen geçerli bir plaka giriniz.')
+
     context = {
-        'default':default,
-        'car':cars,
-        'default1':default1,
-        'default2':default2
+        'default': monthly_data,
+        'car': car_instance,
+        'default1': car_data,
+        'default2': type_data
     }
-    print(context)
-    return render(request,'report/page/plate_report.html',context)
+    return render(request, 'report/page/plate_report.html', context)
 
 #Export exel
 def export_Liter_Excel(request):
+    # Filtrelemeden gelen GET parametrelerine göre queryset'i oluştur
+    queryset = Fuell.objects.select_related("car", "user").all().order_by('-create_at')
+    myFilter = LiterFilter(request.GET, queryset=queryset)
+    fuel_data = myFilter.qs
+
+    # Excel response ayarları
     response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename=Lt/Km Raporlama-'+\
-        str(datetime.now().date())+'.xls'
-    wb = xlwt.Workbook(encoding = "utf-8")
-    ws = wb.add_sheet("Expenses")
-    row_num = 0
+    response['Content-Disposition'] = f'attachment; filename=Lt_Km_Raporlama-{datetime.now().date()}.xls'
+
+    wb = xlwt.Workbook(encoding="utf-8")
+    ws = wb.add_sheet("Lt_Km")
+
+    # Başlık satırı
+    columns = ["Plaka", "İlçe", "Kilometre", "Litre", "Km/Lt", "Teslim Alan", "Tarih"]
+    header_style = xlwt.XFStyle()
+    header_style.font.bold = True
+
+    for col_num, column_title in enumerate(columns):
+        ws.write(0, col_num, column_title, header_style)
+
+    # Satırlar
     font_style = xlwt.XFStyle()
-    font_style.font.bold = True
+    date_style = xlwt.easyxf(num_format_str='DD/MM/YYYY')
 
-    column = ["Plaka","İlçe","Kilometre","Litre","Km/Lt","Teslim alan","Tarih"]
+    for row_num, item in enumerate(fuel_data, start=1):
+        ws.write(row_num, 0, item.car.plate.upper() if item.car and item.car.plate else "", font_style)
+        ws.write(row_num, 1, item.contry.upper() if item.contry else "", font_style)
+        ws.write(row_num, 2, int(item.kilometer) if item.kilometer else 0, font_style)
+        ws.write(row_num, 3, float(item.liter) if item.liter else 0, font_style)
+        ws.write(row_num, 4, float(item.average) if item.average else 0, font_style)
+        ws.write(row_num, 5, item.delivery.upper() if item.delivery else "", font_style)
+        ws.write(row_num, 6, item.create_at.date() if item.create_at else "", date_style)
 
-    for col_num in range(len(column)):
-        ws.write(row_num,col_num,column[col_num],font_style)
-
-    font_style = xlwt.XFStyle()
-
-    rows = liter_report.values_list("car__plate","contry","kilometer","liter","average","delivery","create_at")
-
-    for row in rows:
-        row_num += 1
-        for col_num in range(len(row)):
-            ws.write(row_num,col_num,str(row[col_num]).upper(),font_style)
     wb.save(response)
-
     return response
 
 def export_Excel(request):
+    # Veriyi filtrele
+    fuel = Fuell.objects.select_related("car", "user").all().order_by('-create_at')
+    myFilter = OrderFilter(request.GET, queryset=fuel)
+    fuel = myFilter.qs
+
+    # Excel response ayarları
     response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename=Genel_Raporlama-'+\
-        str(datetime.now().date())+'.xls'
-    wb = xlwt.Workbook(encoding = "utf-8")
+    response['Content-Disposition'] = f'attachment; filename=Genel_Raporlama-{datetime.now().date()}.xls'
+
+    # Excel kitabı ve sayfası
+    wb = xlwt.Workbook(encoding="utf-8")
     ws = wb.add_sheet("Expenses")
-    row_num = 0
+
+    # Başlıklar
+    columns = ["Plaka", "İlçe", "Kilometre", "Yakıt Tipi", "Litre", "Teslim alan", "Açıklama", "Tarih"]
     font_style = xlwt.XFStyle()
     font_style.font.bold = True
 
-    column = ["Plaka","İlçe","Kilometre","Yakıt Tipi","Litre","Teslim alan","Açıklama","Tarih"]
+    # Başlık satırını yaz
+    for col_num, column_title in enumerate(columns):
+        ws.write(0, col_num, column_title, font_style)
 
-    for col_num in range(len(column)):
-        ws.write(row_num,col_num,column[col_num],font_style)
-
+    # Stil sıfırla
     font_style = xlwt.XFStyle()
 
-    rows = fuel_general_report.values_list("car__plate","contry","kilometer","fuel_type","liter","delivery","comment","create_at")
+    # Satırları yaz
+    for row_num, item in enumerate(fuel, start=1):
+        ws.write(row_num, 0, item.car.plate.upper() if item.car and item.car.plate else "")
+        ws.write(row_num, 1, item.contry.upper() if item.contry else "")
+        ws.write(row_num, 2, str(item.kilometer).upper() if item.kilometer else "")
+        ws.write(row_num, 3, item.fuel_type.upper() if item.fuel_type else "")
+        ws.write(row_num, 4, str(item.liter).upper() if item.liter else "")
+        ws.write(row_num, 5, item.delivery.upper() if item.delivery else "")
+        ws.write(row_num, 6, item.comment.upper() if item.comment else "")
+        ws.write(row_num, 7, item.create_at.strftime('%Y-%m-%d %H:%M'))
 
-    for row in rows:
-        row_num += 1
-        for col_num in range(len(row)):
-            ws.write(row_num,col_num,str(row[col_num]).upper(),font_style)
     wb.save(response)
-
     return response
 
+
 def export_Car_Excel(request):
+    # Filtreleme uygulanıyor
+    car_queryset = Car.objects.all().order_by('-create_at')
+    myFilter = CarFilter(request.GET, queryset=car_queryset)
+    cars = myFilter.qs
+
+    # Excel ayarları
     response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename=Araç Bilgileri-'+\
-        str(datetime.now().date())+'.xls'
-    wb = xlwt.Workbook(encoding = "utf-8")
-    ws = wb.add_sheet("Expenses")
-    row_num = 0
+    response['Content-Disposition'] = f'attachment; filename=Araç_Bilgileri-{datetime.now().date()}.xls'
+
+    wb = xlwt.Workbook(encoding="utf-8")
+    ws = wb.add_sheet("Araç Bilgileri")
+
+    # Başlık satırı
+    columns = ["Plaka", "Marka", "Model", "Araç Cinsi", "Zimmet", "Ünvan", "Kilometre", "Yakıt Tipi", "Sahiplik", "Daire Başkanlığı", "İlçe", "Tarih", "Durum", "Açıklama"]
     font_style = xlwt.XFStyle()
     font_style.font.bold = True
 
-    column = ["Plaka","Marka","Model","Araç Cinsi","Zimmet","Ünvan","Kilometre","Yakt Tipi","Sahiplik","Daire Başkanlığı","iLÇE","Tarih","Durum","Açıklama"]
+    for col_num, column_title in enumerate(columns):
+        ws.write(0, col_num, column_title, font_style)
 
-    for col_num in range(len(column)):
-        ws.write(row_num,col_num,column[col_num],font_style)
-
+    # Veri yazımı
     font_style = xlwt.XFStyle()
-    date_style =xlwt.easyxf(num_format_str="dd/mm/yyyy") 
-    rows = car_about_report
-    for row in rows:
-        row_num += 1
-        ws.write(row_num,0,row.plate,font_style)
-        ws.write(row_num,1,row.brand.upper(),font_style)
-        ws.write(row_num,2,row.model.upper(),font_style)
-        ws.write(row_num,3,row.get_vehicle_type_display(),font_style)
-        ws.write(row_num,4,row.debit.upper(),font_style)
-        ws.write(row_num,5,row.title.upper(),font_style)
-        ws.write(row_num,6,int(row.kilometer),font_style)
-        ws.write(row_num,7,row.get_fuel_type_display(),font_style)
-        ws.write(row_num,8,row.get_possession_display(),font_style)
-        ws.write(row_num,9,row.get_department_display(),font_style)
-        ws.write(row_num,10,row.get_contry_display(),font_style)
-        ws.write(row_num,11,datetime.date(row.create_at),date_style)
-        ws.write(row_num,12,row.get_status_display(),font_style)
-        ws.write(row_num,13,row.comment,font_style)
-    wb.save(response)
+    date_style = xlwt.easyxf(num_format_str="DD/MM/YYYY")
 
+    for row_num, row in enumerate(cars, start=1):
+        ws.write(row_num, 0, row.plate or '', font_style)
+        ws.write(row_num, 1, (row.brand or '').upper(), font_style)
+        ws.write(row_num, 2, (row.model or '').upper(), font_style)
+        ws.write(row_num, 3, row.get_vehicle_type_display() if row.vehicle_type else '', font_style)
+        ws.write(row_num, 4, (row.debit or '').upper(), font_style)
+        ws.write(row_num, 5, (row.title or '').upper(), font_style)
+        ws.write(row_num, 6, int(row.kilometer) if row.kilometer else 0, font_style)
+        ws.write(row_num, 7, row.get_fuel_type_display() if row.fuel_type else '', font_style)
+        ws.write(row_num, 8, row.get_possession_display() if row.possession else '', font_style)
+        ws.write(row_num, 9, row.get_department_display() if row.department else '', font_style)
+        ws.write(row_num,10, row.get_contry_display() if row.contry else '', font_style)
+        ws.write(row_num,11, row.create_at.date() if row.create_at else '', date_style)
+        ws.write(row_num,12, row.get_status_display() if row.status else '', font_style)
+        ws.write(row_num,13, row.comment or '', font_style)
+
+    wb.save(response)
     return response

@@ -2,6 +2,7 @@ from django import template
 from datetime import datetime,timedelta
 import re
 import locale
+from page.models import Car,Fuell
 
 register = template.Library()
 
@@ -60,3 +61,21 @@ def format_number(value):
         return locale.format_string("%0.0f", value, grouping=True)
     except (ValueError, TypeError):
         return value
+    
+@register.simple_tag
+def get_object_display(model_name, object_id):
+    """Model adı ve object_id ile ilişkili nesnenin plakasını döndüren tag."""
+    if model_name == 'Car':
+        try:
+            car = Car.objects.get(id=object_id)
+            return car.plate  # veya plakanın doğru alan adı neyse onu döndür
+        except Car.DoesNotExist:
+            return 'Bilinmiyor'
+    elif model_name == 'Fuell':
+        try:
+            fuel = Fuell.objects.get(id=object_id)
+            car = fuel.car  # Fuel modelindeki 'car' ilişkisini kullanarak
+            return car.plate if car else 'Bilinmiyor'
+        except Fuell.DoesNotExist:
+            return 'Bilinmiyor'
+    return 'N/A'

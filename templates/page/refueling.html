@@ -50,12 +50,10 @@
                     <label for="username" class="form-label">Teslim Alan **({{sel_item.debit}})  </label>
                     <input type="text" class="form-control" id="username" name="delivery" placeholder="Yakıtı teslim alan" autofocus="" required>
                 </div>
-                {% if request.user.contry == "merkez" %}
                   <div class="mb-3 ">
                     <label for="username" class="form-label">Açıklama </label>
                     <input type="text" class="form-control"  name="comment" placeholder="Açıklama" autofocus="" >
                   </div>
-                {% endif %}
                 <button class="btn btn-primary d-grid w-100" >Kaydet</button>
             </form>
             

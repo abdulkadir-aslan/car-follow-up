@@ -7,6 +7,38 @@
 {% block content%}
 <div class="container-xxl flex-grow-1 container-p-y">
 <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kayıtlar /</span> Log Kayıtları</h4>
+<!--=== Filtreleme === -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row gx-3 gy-2 align-items-center">
+                    <div class="col-md-3">
+                      <label for="{{ filter.form.user_name.id_for_label }}">Kullanıcı Adı</label>
+                      {% render_field filter.form.user_name class="form-control" %}
+                    </div>
+                    <div class="col-md-3">
+                      <label for="{{ filter.form.change_type.id_for_label }}">Durum</label>
+                      {% render_field filter.form.change_type class="form-select color-dropdown" %}
+                    </div>
+                    <div class="col-md-3">
+                      <label for="{{ filter.form.field_name.id_for_label }}">Değişen Kısım</label>
+                      {% render_field filter.form.field_name class="form-control" %}
+                    </div>
+                    <div class="col-md-3">
+                      <label for="{{ filter.form.plate_number.id_for_label }}">Plaka</label>
+                      {% render_field filter.form.plate_number class="form-control" %}
+                    </div>
+                    
+                    <div class="col-md-3">
+                    <label class="form-label" for="showToastPlacement">&nbsp;</label>
+                    <button id="showToastPlacement" class="btn btn-primary d-block">Filtrele</button>
+                    </div>
+                </div>
+        </form>
+        </div>
+        
+      </div>
+      <!--=== Filtreleme === -->
 <div class="card">
     <h5 class="card-header"></h5>
     <div class="table-responsive text-nowrap">
@@ -35,7 +67,7 @@
                   <td>Yakıt</td>
                 {% endif %}
                 
-                <td>{{ log.object_id}}</td>
+                <td>{% get_object_display log.model_name log.object_id %}</td>
                 {% if log.field_name == "N/A" or log.field_name|length > 40 %}
                   <td>{{ log.field_name}}</td>
                   <td>{{ log.old_value }}</td>

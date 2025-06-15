@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
 from page.models import Car, Fuell
+from django.core.exceptions import ValidationError
 
 class LoginForm(forms.Form):
     username = forms.CharField(
@@ -118,10 +119,44 @@ class UpdateUserForm(UserCreationForm):
         fields = ('password1','password2')
     
 class FuellForm(forms.ModelForm):
+    plate = forms.CharField(label="Plaka", max_length=20)
+
     class Meta:
         model = Fuell
         fields = [
             'kilometer',
             'liter',
             'delivery',
+            'comment',
         ]
+
+    def __init__(self, *args, **kwargs):
+        super(FuellForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.car:
+            self.fields['plate'].initial = self.instance.car.plate
+
+    def clean_plate(self):
+        # Girilen değeri al, boşlukları sil, büyük harfe çevir
+        new_plate = self.cleaned_data.get('plate').replace(" ", "").upper()
+        current_car = self.instance.car
+
+        try:
+            # Silinmiş boşluklarla karşılaştırma yap
+            Car.objects.get(plate=new_plate)
+        except Car.DoesNotExist:
+            raise ValidationError("Bu plaka sistemde kayıtlı değil. Lütfen mevcut bir araç seçin.")
+
+        return new_plate
+
+    def save(self, commit=True):
+        instance = super(FuellForm, self).save(commit=False)
+        new_plate = self.cleaned_data.get('plate').replace(" ", "").upper()
+
+        # Eğer plaka farklıysa, güncelle
+        if new_plate and instance.car.plate != new_plate:
+            car = Car.objects.get(plate=new_plate)
+            instance.car = car
+
+        if commit:
+            instance.save()
+        return instance

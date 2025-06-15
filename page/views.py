@@ -1,5 +1,5 @@
 from datetime import datetime,date,timedelta
-import calendar
+from calendar import monthrange
 from django.shortcuts import render,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from account.models import User
@@ -9,104 +9,109 @@ from account.forms import CarForm,FuellForm
 from django.contrib import messages
 from django.db.models import ProtectedError
 from django.core.paginator import Paginator
-from report.filters import PlateFilter,FuelPlateFilter
+from report.filters import PlateFilter,FuelPlateFilter,ChangeHistoryFilter
 
 @admin_only
 @login_required(login_url="login")
 def dataload(request):
-    a = request.GET.get('data')
+    raw_data = request.GET.get('data', '')
     table_data = []
-    loaddata = []
-    if a is not None:
-        for item in a.splitlines():
-            items = item.split(",")
-            if Car.objects.filter(plate = items[0].replace(" ", "").upper()).exists():
-                messages.add_message(
-                        request,messages.WARNING,
-                        f'"{items[0]}" Plakalı araç sisteme kayıtlı.Mevcut kayıt üzerinden işlem yapabilirsiniz.')
-                return redirect("dataload")
-            if len(item.split(",")) == 12:
-                loaddata.append(Car(
-                    plate= items[0].replace(" ", "").upper(),
-                    brand= items[1].upper(),
-                    model= items[2].upper(),
-                    debit= items[3].upper(),
-                    title= items[4].upper(),
-                    kilometer= items[5],
-                    vehicle_type= items[6],
-                    contry= items[7],
-                    department= items[8],
-                    possession= items[9],
-                    comment= items[11].upper()
-                    ))
-                table_data.append({
-                    'plate': items[0].replace(" ", "").upper(),
-                    'brand': items[1].upper(),
-                    'model': items[2].upper(),
-                    'debit': items[3].upper(),
-                    'title': items[4].upper(),
-                    'kilometer': items[5],
-                    'vehicle_type': items[6],
-                    'contry': items[7],
-                    'department': items[8],
-                    'possession': items[9],
-                    'create_at': items[10],
-                    'comment': items[11].upper()
-                    })                
-            elif len(item.split(",")) <= 2:
-                pass
-            else:
-                messages.add_message(
-                        request,messages.WARNING,
-                        f'"{item}" Bilgiler istenilen formda değil.')
-                return redirect("dataload") 
-        if len(loaddata) >=1:
-            Car.objects.bulk_create(loaddata)
-            messages.add_message(
-                            request,messages.SUCCESS,
-                            f'Araç bilgileri veri tabanına eklendi.')
+    to_create = []
 
-    return render(request ,'dataload.html',{'table_data': table_data})
+    if raw_data:
+        lines = raw_data.strip().splitlines()
+
+        for line in lines:
+            items = [i.strip() for i in line.split(",")]
+
+            # Geçersiz satır
+            if len(items) != 12:
+                if len(items) <= 2:
+                    continue  # Boş veya başlık satırı gibi görünüyor
+                messages.warning(request, f'"{line}" satırı istenilen formda değil.')
+                return redirect("dataload")
+
+            plate = items[0].replace(" ", "").upper()
+
+            # Araç zaten kayıtlıysa
+            if Car.objects.filter(plate=plate).exists():
+                messages.warning(request, f'"{plate}" plakalı araç sistemde mevcut.')
+                return redirect("dataload")
+
+            # Hazırlanan veri kaydedilecek ve görüntülenecek listeye ekleniyor
+            car_data = {
+                'plate': plate,
+                'brand': items[1].upper(),
+                'model': items[2].upper(),
+                'debit': items[3].upper(),
+                'title': items[4].upper(),
+                'kilometer': items[5],
+                'vehicle_type': items[6],
+                'contry': items[7],
+                'department': items[8],
+                'possession': items[9],
+                'create_at': items[10],
+                'comment': items[11].upper(),
+            }
+
+            to_create.append(Car(**{k: v for k, v in car_data.items() if k != 'create_at'}))
+            table_data.append(car_data)
+
+        # Veritabanına ekleme
+        if to_create:
+            Car.objects.bulk_create(to_create)
+            messages.success(request, f'{len(to_create)} araç başarıyla eklendi.')
+
+    return render(request, 'dataload.html', {'table_data': table_data})
 
 @login_required(login_url="login")
 def index(request):
-    context = dict()
-    if request.user.is_superuser or request.user.is_staff:
-        fuel = Fuell.objects.select_related("car","user").all()
-        dateNow = datetime.now().date()
-        dateTomorrow = dateNow + timedelta(days=1)
-        yesterday = dateNow + timedelta(days= -1)
-        yesterday = fuel.filter(create_at__range=(date(yesterday.year,yesterday.month,yesterday.day),date(dateNow.year,dateNow.month,dateNow.day)))
-        month = fuel.filter(create_at__range=(date(dateNow.year,dateNow.month,1),date(dateNow.year,dateNow.month,calendar.monthrange(dateNow.year, dateNow.month)[1])))        
-        year = fuel.filter(create_at__range=(date(dateNow.year,1,1),date(dateNow.year,12,31)))
-        a = fuel.filter(create_at__range=(date(dateNow.year,dateNow.month,dateNow.day),date(dateTomorrow.year,dateTomorrow.month,dateTomorrow.day)))
-        akcakale = sum([item.liter for item in a.filter(contry="akçakale")])
-        birecik = sum([item.liter for item in a.filter(contry="birecik")])
-        bozova = sum([item.liter for item in a.filter(contry="bozova")])
-        ceylanpınar = sum([item.liter for item in a.filter(contry="ceylanpınar")])
-        halfeti = sum([item.liter for item in a.filter(contry="halfeti")])
-        harran = sum([item.liter for item in a.filter(contry="harran")])
-        hilvan = sum([item.liter for item in a.filter(contry="hilvan")])
-        siverek = sum([item.liter for item in a.filter(contry="siverek")])
-        suruç = sum([item.liter for item in a.filter(contry="suruç")])
-        viranşehir = sum([item.liter for item in a.filter(contry="viranşehir")])
-        merkez = sum([item.liter for item in a.filter(contry="merkez")])
-        context = {
-            "today": sum([item.liter for item in a]),
-            "yesterday": sum([item.liter for item in yesterday]),
-            "month": sum([item.liter for item in month]),
-            "year": sum([item.liter for item in year]),
-            "default":[merkez,akcakale,birecik,bozova,ceylanpınar,halfeti,harran,hilvan,siverek,suruç,viranşehir]
-        }
-        return render(request,'index.html',context)
-    else:
+    if not (request.user.is_superuser or request.user.is_staff):
         return redirect("refueling")
 
-def page_not_found(request,exception):
-    return render(request,"404-error.html")
+    today = datetime.now().date()
+    tomorrow = today + timedelta(days=1)
+    start_of_month = date(today.year, today.month, 1)
+    end_of_month = date(today.year, today.month, monthrange(today.year, today.month)[1])
+    start_of_year = date(today.year, 1, 1)
+    end_of_year = date(today.year, 12, 31)
+    yesterday = today - timedelta(days=1)
 
-def page_not_found_500(request):
-    return render(request,"404-error.html")
+    # Yakıt verilerini çek
+    fuel = Fuell.objects.select_related("car", "user").all()
+
+    # Tarih aralığına göre filtreler
+    today_fuel = fuel.filter(create_at__range=(today, tomorrow))
+    yesterday_fuel = fuel.filter(create_at__range=(yesterday, today))
+    month_fuel = fuel.filter(create_at__range=(start_of_month, end_of_month))
+    year_fuel = fuel.filter(create_at__range=(start_of_year, end_of_year))
+
+    # İlçe bazlı toplamlar
+    districts = ["merkez", "akçakale", "birecik", "bozova", "ceylanpınar", "halfeti",
+                 "harran", "hilvan", "siverek", "suruç", "viranşehir"]
+
+    district_liters = [
+        sum(item.liter for item in today_fuel.filter(contry=ilce)) for ilce in districts
+    ]
+
+    context = {
+        "today": sum(item.liter for item in today_fuel),
+        "yesterday": sum(item.liter for item in yesterday_fuel),
+        "month": sum(item.liter for item in month_fuel),
+        "year": sum(item.liter for item in year_fuel),
+        "default": district_liters
+    }
+
+    return render(request, 'index.html', context)
+
+def test_error(request):
+    1 / 0  # ZeroDivisionError oluşturur
+    
+def page_not_found(request,exception):
+    return render(request,"404-error.html",status=404)
+
+def server_error(request):
+    return render(request,"404-error.html",500)
 
 @login_required(login_url="login")
 @employe_only
@@ -285,27 +290,43 @@ def fuels_home(request):
 
 @login_required(login_url="login")
 @employe_only
-def editfuels(request,id):
-    fuell = Fuell.objects.get(id=id)
-    if request.method == "POST":
-        form = FuellForm(request.POST or None, instance=fuell)
-        if form.is_valid():
-            previous_amount = Fuell.objects.filter(car = fuell.car.id).order_by('-create_at')
-            if len(previous_amount) > 1:
-                previous_amount = int(previous_amount[1].kilometer)
-            else:
-                previous_amount = int(fuell.car.kilometer)
-            fuell.average = (int(form.data["kilometer"])-previous_amount)/int(form.data["liter"])
-            fuell.save()
-            form.save()
-            messages.add_message(
-                request,messages.SUCCESS,
-                f'*{fuell.car.plate}* Aracı için yakıt bilgileri güncellendi.')
-            return redirect('fuels_home')
+def editfuels(request, id):
+    fuell = get_object_or_404(Fuell, id=id)
+
+    # Önceki yakıt kaydının kilometresi
+    previous_fuels = Fuell.objects.filter(car=fuell.car).exclude(id=fuell.id).order_by('-create_at')
+    if previous_fuels.exists():
+        previous_amount = previous_fuels[0].kilometer
     else:
-        form =FuellForm(instance=fuell)
-        
-    return render(request,'page/fuell_edit.html',{'form':form,'fuel':fuell})
+        previous_amount = fuell.car.kilometer  # araç km'si baz alınır
+
+    if request.method == "POST":
+        form = FuellForm(request.POST, instance=fuell)
+        if form.is_valid():
+            km = int(form.cleaned_data["kilometer"])
+            liter = float(form.cleaned_data["liter"])
+            previous_amount = int(previous_amount)
+            # Ortalama hesaplama
+            if liter > 0:
+                fuell.average = (km - previous_amount) / liter
+            else:
+                fuell.average = 0  # litre 0 ise hata önlemek için 0 yapabiliriz
+
+            fuell = form.save(commit=False)
+            fuell.average = fuell.average
+            fuell.save()
+
+            messages.success(request, f'*{fuell.car.plate}* Aracı için yakıt bilgileri güncellendi.')
+            return redirect('fuels_home')
+        else:
+            # Form hatalarını mesaj olarak göster
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.warning(request, f"Plaka: {error}")
+    else:
+        form = FuellForm(instance=fuell)
+
+    return render(request, 'page/fuell_edit.html', {'form': form, 'fuel': fuell, 'previous_amount': previous_amount})
 
 @login_required(login_url="login")
 def fuelsDelete(request,myid):
@@ -337,14 +358,15 @@ def fuelsDelete(request,myid):
 @login_required(login_url="login")
 @admin_only
 def audit_log_view(request):
-    logs = ChangeHistory.objects.select_related().all().order_by('-timestamp')
-    
-    # Sayfalama
-    paginator = Paginator(logs, 10)  # Sayfada 10 kayıt göster
-    page_number = request.GET.get('page')  # Sayfa numarasını al
+    # Formu oluşturuyoruz
+    filter = ChangeHistoryFilter(request.GET, queryset=ChangeHistory.objects.all().order_by('-timestamp'))
+
+    # Sayfalama işlemi
+    paginator = Paginator(filter.qs, 10)  # Filter'lanan queryset'e göre sayfalama
+    page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
-    return render(request, 'page/audit_log.html', {'page_obj': page_obj})
+
+    return render(request, 'page/audit_log.html', {'page_obj': page_obj, 'filter': filter})
 
 def log_delete(request, log_id):
     log = get_object_or_404(ChangeHistory, id=log_id)

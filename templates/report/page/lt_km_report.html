@@ -47,7 +47,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="demo-inline-spacing">
-                    <a href="{% url 'export-liter-excel'  %}"class="btn btn-success float-end">Exel</a>
+                    <a href="{% url 'export-liter-excel'  %}?{{ request.GET.urlencode }}"class="btn btn-success float-end">Exel</a>
                     </div>
                 </div>
                 <hr class="m-0">

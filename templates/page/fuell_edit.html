@@ -16,12 +16,13 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">{{fuel.car.plate}} - {{fuel.car.get_vehicle_type_display}} - {{fuel.car.brand}} - {{fuel.car.model}} <h5>
         </div>
+        
         <div class="card-body">
             <form id="formAuthentication"  class="mb-3" method="POST">
                 {% csrf_token %}
                 <div class="mb-3">
                 <label for="username" class="form-label">Plaka</label>
-                <input type="text" value="{{fuel.car.plate}}" class="form-control" id="username" name="plate" placeholder="Enter your username"readonly autofocus="">
+                <input type="text" value="{{fuel.car.plate}}" class="form-control" id="username" name="plate" placeholder="Enter your username" autofocus="">
               </div>
               <div class="mb-3">
                 <label for="email" class="form-label">Araç Bilgileri</label>
@@ -29,15 +30,19 @@
               </div>
               <div class="mb-3 ">
                 <label for="username" class="form-label">Kilometre **</label>
-                <input type="number" value={{fuel.kilometer}} class="form-control" id="username" min="{{previous_amount}}"  name="kilometer" placeholder="Araç km'sini giriniz"  autofocus="" required>
+                <input type="number" value="{{fuel.kilometer}}" class="form-control" id="username" min="{{previous_amount}}"  name="kilometer" placeholder="Araç km'sini giriniz"  autofocus="" required>
               </div>
               <div class="mb-3 ">
                 <label for="username" class="form-label">Aldığı Litre **</label>
-                <input type="number" class="form-control" value={{fuel.liter}} id="username" name="liter" placeholder="Litre" autofocus="" required>
+                <input type="number" class="form-control" value="{{fuel.liter}}" id="username" name="liter" placeholder="Litre" autofocus="" required>
               </div>
               <div class="mb-3 ">
                 <label for="username" class="form-label">Teslim Alan **({{fuel.car.debit}})  </label>
-                <input type="text" class="form-control" value={{fuel.delivery}} name="delivery" placeholder="Yakıtı teslim alan" autofocus="" required>
+                <input type="text" class="form-control" value="{{form.delivery.value}}" name="delivery" placeholder="Yakıtı teslim alan" autofocus="" required>
+              </div>
+              <div class="mb-3 ">
+                <label for="username" class="form-label">Açıklama  </label>
+                <input type="text" class="form-control" value="{{form.comment.value}}" name="comment" placeholder="Açıklama" autofocus="" >
               </div>
               <button type="submit" class="btn btn-primary">Düzenle</button>
             </form>

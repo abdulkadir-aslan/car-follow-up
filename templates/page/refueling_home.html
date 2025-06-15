@@ -99,33 +99,33 @@
                     <div class="col-sm-12 col-md-7">
                         <ul class="pagination justify-content-end px-4">
                             {% if fuel.has_previous %}
-                                <li class="page-item" >
-                                    <a class="page-link" href="?page={{ fuel.previous_page_number }}" >
+                                <li class="page-item">
+                                    <a class="page-link" href="?{{ query_string }}&page={{ fuel.previous_page_number }}">
                                         ← Önceki
                                     </a>
                                 </li>
-                            {% endif%}
+                            {% endif %}
+
                             {% for page_number in fuel.adjusted_elided_pages %}
                                 {% if page_number == fuel.paginator.ELLIPSIS %}
-                                    <li >{{page_number}}</li>
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
                                 {% else %}
-                                <li class="page-item {% if page_number == fuel.number %}active{% endif %}" >
-                                    <a  href="?page={{ page_number }}"
-                                    class="page-link {% if page_number == fuel.number %}current{% endif %}">
-                                    {{page_number}}
-                                    </a>
-                                </li>
+                                    <li class="page-item {% if page_number == fuel.number %}active{% endif %}">
+                                        <a class="page-link" href="?{{ query_string }}&page={{ page_number }}">
+                                            {{ page_number }}
+                                        </a>
+                                    </li>
                                 {% endif %}
-                            {% endfor %} 
-                            
+                            {% endfor %}
+
                             {% if fuel.has_next %}
-                                <li class="page-item" >
-                                    <a class="page-link" href="?page={{ fuel.next_page_number }}" >
+                                <li class="page-item">
+                                    <a class="page-link" href="?{{ query_string }}&page={{ fuel.next_page_number }}">
                                         Sonraki →
                                     </a>
                                 </li>
-                            {% endif%}
-                            </ul>
+                            {% endif %}
+                        </ul>
                     </div>
                 </div>
         </nav>

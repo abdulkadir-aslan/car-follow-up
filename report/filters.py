@@ -68,4 +68,13 @@ class FuelPlateFilter(django_filters.FilterSet):
             "car__plate",
              ]
         exclude = ['customer','create_at ']
-  
+
+class ChangeHistoryFilter(django_filters.FilterSet):
+    user_name = django_filters.CharFilter(field_name='user__first_name', lookup_expr='icontains', label='Kullanıcı Adı')
+    change_type = django_filters.ChoiceFilter(choices=[('update', 'Düzenlendi'), ('create', 'Oluşturuldu'), ('delete', 'Silindi')], label='Durum', required=False)
+    field_name = django_filters.CharFilter(field_name='field_name', lookup_expr='icontains', label='Değişen Kısım', required=False)
+    plate_number = django_filters.CharFilter(field_name='old_value', lookup_expr='icontains', label='Plaka', required=False)
+
+    class Meta:
+        model = ChangeHistory
+        fields = ['user_name', 'change_type', 'field_name', 'plate_number']  
