@@ -1,7 +1,8 @@
 from django.db import models
 from account.models import User
+from django.contrib.auth import get_user_model
 from .middleware import get_current_user
-
+from django.utils import timezone
 
 STATUS= (
     ('active','Aktif'),
@@ -218,3 +219,12 @@ class Fuell(models.Model):
         return changes
     def __str__(self):
         return self.contry
+    
+class ZimmetFisi(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='zimmet_fisleri')
+    file = models.FileField(upload_to='zimmet_fisleri/%Y/%m/%d/', verbose_name="Zimmet Fişi", null=True, blank=False)
+    created_at = models.DateTimeField(default=timezone.now)
+    uploaded_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
+        
+    def __str__(self):
+        return f"{self.car.plate} - Zimmet Fişi - {self.created_at.strftime('%Y-%m-%d %H:%M')}"

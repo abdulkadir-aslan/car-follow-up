@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import Car,Fuell,ChangeHistory
+from .models import Car,Fuell,ChangeHistory,ZimmetFisi
+
+class ZimmetFisiAdmin(admin.ModelAdmin):
+    list_display = ('car', 'file', 'created_at', 'uploaded_by')
+    search_fields = ('car__plate', 'created_at',)
+    list_filter = ('created_at',)
+
+admin.site.register(ZimmetFisi, ZimmetFisiAdmin)
 
 class ChangeHistoryAdmin(admin.ModelAdmin):
     list_display = ('model_name', 'object_id', 'field_name', 'old_value', 'new_value', 'change_type', 'user', 'timestamp')

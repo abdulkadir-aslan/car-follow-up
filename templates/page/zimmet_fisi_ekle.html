@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+  <h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">{{ car.plate }} için  /</span> Zimmet Fişleri
+  </h4>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="col-xl">
+          <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Zimmet Fişi Ekle</h5>
+            </div>
+            <div class="card-body">
+              <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <input type="text" name="car" id="id_car" value="{{ form.car.value}}" class="form-control" placeholder="Plaka" maxlength="30" required readonly style="display: none;">               
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" for="basic-default-fullname">Dosya</label>
+                  <input type="file" name="file" class="form-control" id="inputGroupFile02" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Fişi Yükle</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- Notifications -->
+        <h5 class="card-header">{{ car.plate }} için Yüklenen Zimmet Fișleri</h5>
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless border-bottom">
+            <thead>
+              <tr>
+                <th class="text-nowrap">Adı</th>
+                <th class="text-nowrap">Yükleyen Kullanıcı</th>
+                <th class="text-nowrap text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for zimmet_fisi in zimmet_fisleri %}
+                <tr>
+                  <td class="text-nowrap"><a href="{{ zimmet_fisi.file.url }}" target="_blank">{{ zimmet_fisi.file }}</a></td>
+                  <td class="text-nowrap">{{ zimmet_fisi.uploaded_by }}</td>
+                  {% if request.user.is_superuser %}
+                    <td class="text-nowrap text-center"><a href="{% url 'zimmet_fisi_sil' zimmet_fisi.id %}" class="btn btn-danger btn-sm delete-btn">Sil</a></td>
+                  {% else %}
+                    <td class="text-nowrap text-center">-</td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <!-- /Notifications -->
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function() {
+      // Silme butonuna tıklanma olayını dinliyoruz
+      $('.delete-btn').click(function(e) {
+          e.preventDefault(); // Linkin yönlendirmesini engelle
+          var url = $(this).attr('href'); // Silme URL'sini al
+          // Onay penceresini göster
+          if (confirm("Bu öğeyi silmek istediğinizden emin misiniz?")) {
+              // Onaylandıysa, URL'ye yönlendir
+              window.location.href = url;
+          }
+      });
+  });
+</script>
+{% endblock %}

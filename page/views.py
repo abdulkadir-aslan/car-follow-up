@@ -3,13 +3,44 @@ from calendar import monthrange
 from django.shortcuts import render,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from account.models import User
-from page.models import Car,Fuell,ChangeHistory
+from page.models import Car,Fuell,ChangeHistory,ZimmetFisi
 from page.decorators import *
-from account.forms import CarForm,FuellForm
+from account.forms import CarForm,FuellForm,ZimmetFisiForm
 from django.contrib import messages
 from django.db.models import ProtectedError
 from django.core.paginator import Paginator
 from report.filters import PlateFilter,FuelPlateFilter,ChangeHistoryFilter
+from urllib.parse import urlencode
+import os
+
+def zimmet_fisi_ekle(request, car_id):
+    car = Car.objects.get(id=car_id)
+    zimmet_fisleri = ZimmetFisi.objects.filter(car=car).order_by('-created_at')
+    if request.method == 'POST':
+        form = ZimmetFisiForm(request.POST, request.FILES)
+        print(form)
+        if form.is_valid():
+            zimmet_fisi = form.save(commit=False)
+            zimmet_fisi.uploaded_by = request.user
+            zimmet_fisi.save()
+            messages.success(request, 'Zimmet fişi başarıyla eklendi.')
+            return redirect('zimmet_fisi_ekle', car_id=car.id)
+    else:
+        form = ZimmetFisiForm(initial={'car': car})
+
+    return render(request, 'page/zimmet_fisi_ekle.html', {'form': form, 'car': car,'zimmet_fisleri': zimmet_fisleri,})
+
+def zimmet_fisi_sil(request, zimmet_fisi_id):
+    zimmet_fisi = ZimmetFisi.objects.get(id=zimmet_fisi_id)
+    car = zimmet_fisi.car
+    # PDF dosyasını sil
+    if zimmet_fisi.file:
+        pdf_path = zimmet_fisi.file.path  # Dosya yolu
+        if os.path.exists(pdf_path):
+            os.remove(pdf_path)  # Dosyayı sil
+    zimmet_fisi.delete()
+    messages.success(request, 'Zimmet fişi başarıyla silindi.')
+    return redirect('zimmet_fisi_ekle', car_id=car.id)
 
 @admin_only
 @login_required(login_url="login")
@@ -104,9 +135,6 @@ def index(request):
 
     return render(request, 'index.html', context)
 
-def test_error(request):
-    1 / 0  # ZeroDivisionError oluşturur
-    
 def page_not_found(request,exception):
     return render(request,"404-error.html",status=404)
 
@@ -282,9 +310,14 @@ def fuels_home(request):
                         request,messages.INFO,
                         'İstenilen filtrede değerler bulunamadı.')
         fuel = []
+    query_params = request.GET.copy()
+    if 'page' in query_params:
+        del query_params['page']
+    query_string = urlencode(query_params)
     context ={
         "fuel":item_list,
         "myFilter": myFilter,
+        "query_string": query_string,
     }
     return render(request ,'page/refueling_home.html',context)
 

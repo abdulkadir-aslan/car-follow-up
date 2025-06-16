@@ -75,6 +75,10 @@ class ChangeHistoryFilter(django_filters.FilterSet):
     field_name = django_filters.CharFilter(field_name='field_name', lookup_expr='icontains', label='Değişen Kısım', required=False)
     plate_number = django_filters.CharFilter(field_name='old_value', lookup_expr='icontains', label='Plaka', required=False)
 
+    # Tarih aralığı filtreleri
+    start_date = DateFilter(field_name='timestamp', lookup_expr='gte', label='Başlangıç Tarihi', required=False)
+    end_date = DateFilter(field_name='timestamp', lookup_expr='lte', label='Bitiş Tarihi', required=False)
+
     class Meta:
         model = ChangeHistory
-        fields = ['user_name', 'change_type', 'field_name', 'plate_number']  
+        fields = ['user_name', 'change_type', 'field_name', 'plate_number', 'start_date', 'end_date']

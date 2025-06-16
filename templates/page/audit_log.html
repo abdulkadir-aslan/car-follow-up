@@ -28,7 +28,15 @@
                       <label for="{{ filter.form.plate_number.id_for_label }}">Plaka</label>
                       {% render_field filter.form.plate_number class="form-control" %}
                     </div>
+                    <div class="col-md-3">
+                      <label for="{{ filter.form.start_date.id_for_label }}">Başlangıç Tarihi</label>
+                      {% render_field filter.form.start_date class="form-control" type="date" %}
+                    </div>
                     
+                    <div class="col-md-3">
+                      <label for="{{ filter.form.end_date.id_for_label }}">Bitiş Tarihi</label>
+                      {% render_field filter.form.end_date class="form-control" type="date" %}
+                    </div>
                     <div class="col-md-3">
                     <label class="form-label" for="showToastPlacement">&nbsp;</label>
                     <button id="showToastPlacement" class="btn btn-primary d-block">Filtrele</button>

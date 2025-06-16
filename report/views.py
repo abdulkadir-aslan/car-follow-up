@@ -226,7 +226,6 @@ def export_Excel(request):
     wb.save(response)
     return response
 
-
 def export_Car_Excel(request):
     # Filtreleme uygulanıyor
     car_queryset = Car.objects.all().order_by('-create_at')

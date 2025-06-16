@@ -7,7 +7,11 @@ from page.views import *
 
 
 urlpatterns = [
-    path("test-error/", test_error),
+    
+    path('car/<int:car_id>/zimmet-fisi-ekle/', zimmet_fisi_ekle, name='zimmet_fisi_ekle'),
+    path('zimmet-fisi/<int:zimmet_fisi_id>/sil/', zimmet_fisi_sil, name='zimmet_fisi_sil'),
+
+    
     path('', index,name='home'),
     #audit log
     path("log_delete/<int:log_id>/",log_delete,name="log_delete"),

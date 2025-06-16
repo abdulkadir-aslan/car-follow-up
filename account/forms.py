@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
-from page.models import Car, Fuell
+from page.models import Car, Fuell,ZimmetFisi
 from django.core.exceptions import ValidationError
 
 class LoginForm(forms.Form):
@@ -160,3 +160,15 @@ class FuellForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+class ZimmetFisiForm(forms.ModelForm):
+    class Meta:
+        model = ZimmetFisi
+        fields = ['car', 'file']
+    
+    car = forms.ModelChoiceField(queryset=Car.objects.all(), required=True)
+    file = forms.FileField(required=True)
+    widgets ={
+            'plate' : forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Plakayı giriniz'},),
+    }
+    
