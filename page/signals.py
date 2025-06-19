@@ -1,9 +1,9 @@
 
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import Car, ChangeHistory,Fuell
+from .models import Car, ChangeHistory,Fuell,Notification   
 from .middleware import get_current_user
-
+from django.utils.timezone import now
 
 @receiver(post_save, sender=Fuell)
 @receiver(post_save, sender=Car)
@@ -37,7 +37,6 @@ def track_branch_creation_or_update(sender, instance, created, **kwargs):
                 user=user,
             )
 
-
 @receiver(post_delete, sender=Fuell)
 @receiver(post_delete, sender=Car)
 def track_branch_deletion(sender, instance, **kwargs):
@@ -55,3 +54,57 @@ def track_branch_deletion(sender, instance, **kwargs):
         change_type='delete',
         user=user,
     )
+
+@receiver(post_save, sender=Fuell)
+def check_fuel_notifications(sender, instance, created, **kwargs):
+    if not created:
+        return  # sadece yeni kayıtlar için kontrol yap
+
+    car = instance.car
+    user = instance.user
+    plate = car.plate
+
+    try:
+        average = float(instance.average)
+    except (TypeError, ValueError):
+        average = 0
+
+    try:
+        liter = float(instance.liter)
+    except (TypeError, ValueError):
+        liter = 0
+
+    user_contry = user.contry
+    car_contry = car.contry
+
+    # 1. Ortalama yakıt 30'dan büyükse bildirim
+    if average > 30:
+        Notification.objects.create(
+            user=user,
+            message=f"{plate} plakalı araç km bilgileri yanlış girildi (ortalama yakıt {average:.2f} > 30).",
+            created_at=now()
+        )
+    
+    # 2. Ortalama yakıt 0'dan küçükse bildirim
+    if average < 0:
+        Notification.objects.create(
+            user=user,
+            message=f"{plate} plakalı araç km bilgileri yanlış girildi (ortalama yakıt {average:.2f} < 0).",
+            created_at=now()
+        )
+
+    # 3. Litre 300'den fazla ise bildirim
+    if liter > 300:
+        Notification.objects.create(
+            user=user,
+            message=f"{plate} plakalı araç {liter} litre yakıt alımı yapmıştır.",
+            created_at=now()
+        )
+
+    # 4. Yakıt alınan ilçe, araç kayıtlı ilçeden farklı ise bildirim
+    if instance.contry != car_contry:
+        Notification.objects.create(
+            user=user,
+            message=f"{plate} plakalı araç yakıt alımı {instance.contry} ilçesinde yapılmıştır (kayıtlı ilçe: {car_contry}).",
+            created_at=now()
+        )

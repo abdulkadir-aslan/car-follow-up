@@ -7,7 +7,8 @@ from page.views import *
 
 
 urlpatterns = [
-    
+    path('notifications/delete/<int:notification_id>/', delete_notification, name='delete_notification'),
+    path('notifications/', notifications_view, name='notifications'),
     path('car/<int:car_id>/zimmet-fisi-ekle/', zimmet_fisi_ekle, name='zimmet_fisi_ekle'),
     path('zimmet-fisi/<int:zimmet_fisi_id>/sil/', zimmet_fisi_sil, name='zimmet_fisi_sil'),
 

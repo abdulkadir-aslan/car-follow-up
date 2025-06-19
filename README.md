@@ -10,6 +10,7 @@ Reporting of the daily, weekly, and monthly fuel loading indices of the vehicles
 - Signals
 - Middleware
 - Decorators
+- Notifications
 
 ## Installation
 

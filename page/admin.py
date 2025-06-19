@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Car,Fuell,ChangeHistory,ZimmetFisi
+from .models import Car,Fuell,ChangeHistory,ZimmetFisi,Notification
 
 class ZimmetFisiAdmin(admin.ModelAdmin):
     list_display = ('car', 'file', 'created_at', 'uploaded_by')
@@ -14,6 +14,11 @@ class ChangeHistoryAdmin(admin.ModelAdmin):
 
 admin.site.register(ChangeHistory, ChangeHistoryAdmin)
 
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('user','message','is_read','created_at')
+    list_filter = ('user','message','is_read','created_at')
+
+admin.site.register(Notification, NotificationAdmin)
 # Register your models here.
 class BlockNewCar(admin.ModelAdmin):
     search_fields = ("plate","brand","debit")

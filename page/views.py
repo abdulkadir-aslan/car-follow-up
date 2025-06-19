@@ -3,7 +3,7 @@ from calendar import monthrange
 from django.shortcuts import render,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from account.models import User
-from page.models import Car,Fuell,ChangeHistory,ZimmetFisi
+from page.models import Car,Fuell,ChangeHistory,ZimmetFisi,Notification
 from page.decorators import *
 from account.forms import CarForm,FuellForm,ZimmetFisiForm
 from django.contrib import messages
@@ -12,13 +12,51 @@ from django.core.paginator import Paginator
 from report.filters import PlateFilter,FuelPlateFilter,ChangeHistoryFilter
 from urllib.parse import urlencode
 import os
+from django.utils.timezone import now
 
+@login_required(login_url="login")
+def notifications_view(request):
+    notification_type = request.GET.get('type', 'active')  # 'active' veya 'read'
+
+    if notification_type == 'read':
+        notifications = request.user.notifications.filter(is_read=True).order_by('-created_at')
+    else:
+        notifications = request.user.notifications.filter(is_read=False).order_by('-created_at')
+
+    # Paginator ekliyoruz
+    paginator = Paginator(notifications, 10)  # Sayfa başına 10 bildirim
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    if request.method == "POST":
+        ids = request.POST.getlist('read_ids')
+        if notification_type == 'active':
+            # Aktif bildirimleri okundu olarak işaretle
+            Notification.objects.filter(id__in=ids, user=request.user).update(is_read=True)
+        else:
+            # Okundu bildirimleri tekrar aktif (okunmamış) yap
+            Notification.objects.filter(id__in=ids, user=request.user).update(is_read=False)
+
+        # POST sonrası aynı sekmeye yönlendirelim
+        return redirect(f"{request.path}?type={notification_type}")
+
+    return render(request, "page/notifications.html", {
+        "notifications": page_obj,  # Burada doğrudan `page_obj`'yi gönderiyoruz
+        "notification_type": notification_type,
+    })
+
+@login_required(login_url="login")
+def delete_notification(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+    notification.delete()
+    return redirect('notifications')
+
+@login_required(login_url="login")
 def zimmet_fisi_ekle(request, car_id):
     car = Car.objects.get(id=car_id)
     zimmet_fisleri = ZimmetFisi.objects.filter(car=car).order_by('-created_at')
     if request.method == 'POST':
         form = ZimmetFisiForm(request.POST, request.FILES)
-        print(form)
         if form.is_valid():
             zimmet_fisi = form.save(commit=False)
             zimmet_fisi.uploaded_by = request.user
@@ -30,6 +68,7 @@ def zimmet_fisi_ekle(request, car_id):
 
     return render(request, 'page/zimmet_fisi_ekle.html', {'form': form, 'car': car,'zimmet_fisleri': zimmet_fisleri,})
 
+@login_required(login_url="login")
 def zimmet_fisi_sil(request, zimmet_fisi_id):
     zimmet_fisi = ZimmetFisi.objects.get(id=zimmet_fisi_id)
     car = zimmet_fisi.car
@@ -280,7 +319,11 @@ def register_new_fueling(request):
             previous_amount = int(previous_amount[0].kilometer)
         else:
             previous_amount = int(car.kilometer)
-            
+        # Aynı araç, aynı kilometre ve aynı gün kontrolü
+        today = now().date()
+        if Fuell.objects.filter(user=user,car=car, kilometer=data['kilometer'], create_at__date=today).exists():
+            messages.warning(request, f"{car.plate} aracı için bu kilometrede ({data['kilometer']}) zaten bugün bir kayıt var.")
+            return redirect("refueling")
         fuel = Fuell(user=user ,car =car ,fuel_type=data["fuel_type"],kilometer = data["kilometer"],average=(int(data["kilometer"])-previous_amount)/int(data["liter"]),
                      liter = data["liter"],contry=user.contry,delivery=data['delivery'],comment=data['comment']
         )
