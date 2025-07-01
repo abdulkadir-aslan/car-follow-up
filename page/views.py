@@ -5,23 +5,23 @@ from django.contrib.auth.decorators import login_required
 from account.models import User
 from page.models import Car,Fuell,ChangeHistory,ZimmetFisi,Notification
 from page.decorators import *
-from account.forms import CarForm,FuellForm,ZimmetFisiForm
+from page.forms import CarForm,FuellForm,ZimmetFisiForm
 from django.contrib import messages
 from django.db.models import ProtectedError
 from django.core.paginator import Paginator
 from report.filters import PlateFilter,FuelPlateFilter,ChangeHistoryFilter
 from urllib.parse import urlencode
 import os
-from django.utils.timezone import now
+from django.utils.timezone import now,localdate
 
 @login_required(login_url="login")
 def notifications_view(request):
     notification_type = request.GET.get('type', 'active')  # 'active' veya 'read'
 
     if notification_type == 'read':
-        notifications = request.user.notifications.filter(is_read=True).order_by('-created_at')
+        notifications = Notification.objects.filter(is_read=True).order_by('-created_at')
     else:
-        notifications = request.user.notifications.filter(is_read=False).order_by('-created_at')
+        notifications = Notification.objects.filter(is_read=False).order_by('-created_at')
 
     # Paginator ekliyoruz
     paginator = Paginator(notifications, 10)  # Sayfa başına 10 bildirim
@@ -32,10 +32,10 @@ def notifications_view(request):
         ids = request.POST.getlist('read_ids')
         if notification_type == 'active':
             # Aktif bildirimleri okundu olarak işaretle
-            Notification.objects.filter(id__in=ids, user=request.user).update(is_read=True)
+            Notification.objects.filter(id__in=ids).update(is_read=True)
         else:
             # Okundu bildirimleri tekrar aktif (okunmamış) yap
-            Notification.objects.filter(id__in=ids, user=request.user).update(is_read=False)
+            Notification.objects.filter(id__in=ids).update(is_read=False)
 
         # POST sonrası aynı sekmeye yönlendirelim
         return redirect(f"{request.path}?type={notification_type}")
@@ -139,37 +139,49 @@ def index(request):
     if not (request.user.is_superuser or request.user.is_staff):
         return redirect("refueling")
 
-    today = datetime.now().date()
-    tomorrow = today + timedelta(days=1)
+    today = localdate()
+    yesterday = today - timedelta(days=1)
+    start_of_week = today - timedelta(days=today.weekday())  # Pazartesi
+    end_of_week = start_of_week + timedelta(days=6)          # Pazar
     start_of_month = date(today.year, today.month, 1)
     end_of_month = date(today.year, today.month, monthrange(today.year, today.month)[1])
     start_of_year = date(today.year, 1, 1)
     end_of_year = date(today.year, 12, 31)
-    yesterday = today - timedelta(days=1)
 
-    # Yakıt verilerini çek
-    fuel = Fuell.objects.select_related("car", "user").all()
+    fuel = Fuell.objects.all()
 
-    # Tarih aralığına göre filtreler
-    today_fuel = fuel.filter(create_at__range=(today, tomorrow))
-    yesterday_fuel = fuel.filter(create_at__range=(yesterday, today))
-    month_fuel = fuel.filter(create_at__range=(start_of_month, end_of_month))
-    year_fuel = fuel.filter(create_at__range=(start_of_year, end_of_year))
+    # Tarih filtreleri
+    today_fuel = fuel.filter(create_at__date=today)
+    yesterday_fuel = fuel.filter(create_at__date=yesterday)
+    week_fuel = fuel.filter(create_at__date__range=(start_of_week, end_of_week))
+    month_fuel = fuel.filter(create_at__date__range=(start_of_month, end_of_month))
+    year_fuel = fuel.filter(create_at__date__range=(start_of_year, end_of_year))
 
-    # İlçe bazlı toplamlar
+    # İlçeler
     districts = ["merkez", "akçakale", "birecik", "bozova", "ceylanpınar", "halfeti",
                  "harran", "hilvan", "siverek", "suruç", "viranşehir"]
 
-    district_liters = [
-        sum(item.liter for item in today_fuel.filter(contry=ilce)) for ilce in districts
-    ]
+    # Yardımcı: Belirli queryset için ilçelere göre litre toplamı
+    def aggregate_liters_by_district(queryset):
+        return [sum(item.liter for item in queryset.filter(contry=ilce)) for ilce in districts]
+
+    # Grafik verileri
+    daily_data = aggregate_liters_by_district(today_fuel)
+    weekly_data = aggregate_liters_by_district(week_fuel)
+    monthly_data = aggregate_liters_by_district(month_fuel)
 
     context = {
+        # Toplam veriler (kartlar için)
         "today": sum(item.liter for item in today_fuel),
         "yesterday": sum(item.liter for item in yesterday_fuel),
         "month": sum(item.liter for item in month_fuel),
         "year": sum(item.liter for item in year_fuel),
-        "default": district_liters
+
+        # Grafik verileri
+        "daily_data": daily_data,
+        "weekly_data": weekly_data,
+        "monthly_data": monthly_data,
+        "default": daily_data  # eski default, ilk gösterilen grafik
     }
 
     return render(request, 'index.html', context)
@@ -270,7 +282,7 @@ def update_car(request,myid):
 def refueling(request):
     dateNow = datetime.now().date()
     dateTomorrow = dateNow + timedelta(days=1)
-    a = Fuell.objects.all().filter(contry=request.user.contry,create_at__range=(date(dateNow.year,dateNow.month,dateNow.day),date(dateTomorrow.year,dateTomorrow.month,dateTomorrow.day))).order_by('-create_at')
+    a = Fuell.objects.all().filter(user=request.user,create_at__range=(date(dateNow.year,dateNow.month,dateNow.day),date(dateTomorrow.year,dateTomorrow.month,dateTomorrow.day))).order_by('-create_at')
     litre = sum([item.liter for item in a])
     adet = a.count()
     context ={
@@ -316,15 +328,15 @@ def register_new_fueling(request):
         car = Car.objects.get(plate = data['plate'].replace(" ", "").upper())
         previous_amount = Fuell.objects.filter(car = car).order_by('-create_at')
         if len(previous_amount) > 0:
-            previous_amount = int(previous_amount[0].kilometer)
+            previous_amount = previous_amount[0].kilometer
         else:
-            previous_amount = int(car.kilometer)
+            previous_amount = car.kilometer
         # Aynı araç, aynı kilometre ve aynı gün kontrolü
         today = now().date()
-        if Fuell.objects.filter(user=user,car=car, kilometer=data['kilometer'], create_at__date=today).exists():
-            messages.warning(request, f"{car.plate} aracı için bu kilometrede ({data['kilometer']}) zaten bugün bir kayıt var.")
+        if Fuell.objects.filter(user=user,car=car, kilometer=data['kilometer'],liter = data["liter"], create_at__date=today).exists():
+            messages.warning(request, f"{car.plate} aracı için bu kilometrede ({data['kilometer']}) ve litrede ({data['liter']}) zaten bugün bir kayıt var.")
             return redirect("refueling")
-        fuel = Fuell(user=user ,car =car ,fuel_type=data["fuel_type"],kilometer = data["kilometer"],average=(int(data["kilometer"])-previous_amount)/int(data["liter"]),
+        fuel = Fuell(user=user ,car =car ,fuel_type=data["fuel_type"],kilometer = data["kilometer"],average=(float(data["kilometer"])-previous_amount)/float(data["liter"]),
                      liter = data["liter"],contry=user.contry,delivery=data['delivery'],comment=data['comment']
         )
         messages.add_message(
@@ -383,7 +395,7 @@ def editfuels(request, id):
             liter = float(form.cleaned_data["liter"])
             previous_amount = int(previous_amount)
             # Ortalama hesaplama
-            if liter > 0:
+            if (liter > 0) and (previous_amount < km):
                 fuell.average = (km - previous_amount) / liter
             else:
                 fuell.average = 0  # litre 0 ise hata önlemek için 0 yapabiliriz
@@ -402,7 +414,7 @@ def editfuels(request, id):
     else:
         form = FuellForm(instance=fuell)
 
-    return render(request, 'page/fuell_edit.html', {'form': form, 'fuel': fuell, 'previous_amount': previous_amount})
+    return render(request, 'page/fuell_edit.html', {'form': form, 'fuel': fuell})
 
 @login_required(login_url="login")
 def fuelsDelete(request,myid):

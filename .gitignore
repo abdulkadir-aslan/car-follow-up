@@ -110,6 +110,7 @@ venv.bak/
 .ropeproject
 veri_yükleme/
 .veri_yükleme
+zimmet_fisleri/
 # mkdocs documentation
 /site
 

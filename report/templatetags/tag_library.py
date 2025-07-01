@@ -58,10 +58,18 @@ def format_number(value):
         # Sayıyı formatla
         value = float(value)
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')  # Amerikan İngilizcesi formatını kullan
-        return locale.format_string("%0.0f", value, grouping=True)
+        return locale.format_string("%0.1f", value, grouping=True)
     except (ValueError, TypeError):
         return value
     
+@register.filter    
+def parse_number(value):
+    if isinstance(value, str):
+        return value.replace(",", ".")
+    elif isinstance(value, float) or isinstance(value, int):
+        return str(value)
+    return ""
+       
 @register.simple_tag
 def get_object_display(model_name, object_id):
     """Model adı ve object_id ile ilişkili nesnenin plakasını döndüren tag."""

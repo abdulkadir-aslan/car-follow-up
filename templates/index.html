@@ -17,7 +17,7 @@
               </div>
             </div>
             <span class="fw-semibold d-block mb-1">Bugün Alınan Yakıt</span>
-            <h3 class="card-title mb-2">{{today}}L</h3>
+            <h3 class="card-title mb-2">{{today|format_number}}L</h3>
             {% if today > yesterday %}
             <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +{% subtract today yesterday %}</small>
             {% else %}
@@ -35,7 +35,7 @@
               </div>
             </div>
             <span class="fw-semibold d-block mb-1">Dün Alınan Yakıt</span>
-            <h3 class="card-title mb-2">{{yesterday|floatformat:"g"}}L</h3>
+            <h3 class="card-title mb-2">{{yesterday|format_number}}L</h3>
             <br>
           </div>
         </div>
@@ -49,7 +49,7 @@
               </div>
             </div>
             <span class="fw-semibold d-block mb-1">Bu Ay Alınan Yakıt</span>
-            <h3 class="card-title mb-2">{{month|floatformat:"g"}}L</h3>
+            <h3 class="card-title mb-2">{{month|format_number}}L</h3>
             <br>
           </div>
         </div>
@@ -63,7 +63,7 @@
               </div>
             </div>
             <span class="fw-semibold d-block mb-1">Bu Yıl Alınan Yakıt</span>
-            <h3 class="card-title mb-2">{{year|floatformat:"g"}}L</h3>
+            <h3 class="card-title mb-2">{{year|format_number}}L</h3>
             <br>
           </div>
         </div>
@@ -72,58 +72,63 @@
   </div>
   <div class="row">
     <div class="col-md-12" >
+      <div class="mb-3">
+        <select id="timeRange" class="form-select" style="width: 200px;">
+          <option value="daily">Günlük</option>
+          <option value="weekly">Haftalık</option>
+          <option value="monthly">Aylık</option>
+        </select>
+      </div>
       <div class="card mb-4">
         <canvas id="myChart" width="600" height="200"></canvas>
       </div>
       <script>
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
-            type: 'bar',// 'bar','line','polarArea'
-            data: {
-                labels: ['MERKEZ','AKÇAKALE', 'BİRECİK', 'BOZOVA', 'CEYLANPINAR', 'HALFETİ', 'HARRAN','HİLVAN'
-              ,'SİVEREK','SURUÇ','VİRANŞEHİR'],
-                datasets: [{
-                    label: 'Günlük Yakıt Grafiği LT.',
-                    data: {{default}},
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)',
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)',
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                  yAxes: [{
-              scaleLabel: {
-                display: true,
-                labelString: 'Litre'
-              }
+        const chartLabels = ['MERKEZ','AKÇAKALE', 'BİRECİK', 'BOZOVA', 'CEYLANPINAR', 'HALFETİ', 'HARRAN','HİLVAN','SİVEREK','SURUÇ','VİRANŞEHİR'];
+
+        const chartData = {
+          daily: {{ daily_data|safe }},
+          weekly: {{ weekly_data|safe }},
+          monthly: {{ monthly_data|safe }},
+        };
+
+        const chartLabelText = {
+          daily: 'Günlük Yakıt Miktarı (Litre)',
+          weekly: 'Haftalık Yakıt Miktarı (Litre)',
+          monthly: 'Aylık Yakıt Miktarı (Litre)',
+        };
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: chartLabels,
+            datasets: [{
+              label: chartLabelText['daily'],  // Başlangıçta günlük gösterilir
+              data: chartData.daily,
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
             }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Litre'
                 }
+              }
             }
+          }
+        });
+
+        // Dropdown değişince grafiği güncelle
+        document.getElementById('timeRange').addEventListener('change', function() {
+          const selected = this.value;
+          myChart.data.datasets[0].data = chartData[selected];
+          myChart.data.datasets[0].label = chartLabelText[selected];  // Etiketi güncelle
+          myChart.update();
         });
       </script>
     </div> 

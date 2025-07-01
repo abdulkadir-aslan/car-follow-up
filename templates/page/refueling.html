@@ -39,12 +39,35 @@
                   {% endif %}
                 </div>
                 <div class="mb-3 ">
-                  <label for="username" class="form-label">Kilometre **</label>
-                  <input type="number"  class="form-control" id="username" min="{{previous_amount}}"  name="kilometer" placeholder="Araç km'sini giriniz"  autofocus="" required>
+                  <label for="kilometer" class="form-label">Kilometre **</label>
+                  <input 
+                    type="number"  
+                    class="form-control" 
+                    id="kilometer" 
+                    min="{{previous_amount|parse_number}}" 
+                    step="0.1"  
+                    name="kilometer" 
+                    placeholder="Araç km'sini giriniz"  
+                    autofocus 
+                    required
+                  >
                 </div>
+                <script>
+                  const previousAmount = parseFloat("{{ previous_amount }}");
+                  const input = document.getElementById('kilometer');
+
+                  input.addEventListener('input', () => {
+                    const value = parseFloat(input.value);
+                    if (!isNaN(value) && value < previousAmount) {
+                      input.setCustomValidity('Girilen değer {{ previous_amount }} değerinden küçük olamaz!');
+                    } else {
+                      input.setCustomValidity('');
+                    }
+                  });
+                </script>
                 <div class="mb-3 ">
                   <label for="username" class="form-label">Aldığı Litre **</label>
-                  <input type="number" class="form-control" id="username" name="liter" placeholder="Litre" autofocus="" required>
+                  <input type="number" class="form-control" id="username" min="0" step="0.1"  name="liter" placeholder="Litre" autofocus="" required>
                 </div>
                 <div class="mb-3 ">
                     <label for="username" class="form-label">Teslim Alan **({{sel_item.debit}})  </label>
@@ -56,7 +79,6 @@
                   </div>
                 <button class="btn btn-primary d-grid w-100" >Kaydet</button>
             </form>
-            
             <p class="text-center">
                 <span>Yeni araç yakıt girişi?</span>
                 <a href="/refueling">
@@ -137,7 +159,8 @@
                       </div>
                     </div>
                     <span class="fw-semibold d-block mb-1">Günlük doldurulan Litre</span>
-                    <h3 class="card-title text-nowrap text-center mb-1">{{liter}}</h3>
+                    <br>
+                    <h3 class="card-title text-nowrap text-center mb-1">{{liter|format_number}}</h3>
                   </div>
                 </div>
               </div>
